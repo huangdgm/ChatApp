@@ -22,3 +22,5 @@
 hs_err_pid*
 /ChatServer/nbproject/private/
 /ChatClient/nbproject/private/
+/ChatServer/build/
+/ChatClient/build/

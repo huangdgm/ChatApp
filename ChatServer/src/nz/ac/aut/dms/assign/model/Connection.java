@@ -5,10 +5,12 @@
  */
 package nz.ac.aut.dms.assign.model;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,8 +19,8 @@ import java.net.Socket;
 class Connection extends Thread {
 
     final String DONE = "done";
-    DataInputStream in = null;
-    DataOutputStream out = null;
+    ObjectInputStream ois = null;
+    ObjectOutputStream oos = null;
     Socket clientSocket = null;
 
     /**
@@ -28,9 +30,12 @@ class Connection extends Thread {
     public Connection(Socket clientSocket) {
         try {
             this.clientSocket = clientSocket;
-            in = new DataInputStream(clientSocket.getInputStream());
-            out = new DataOutputStream(clientSocket.getOutputStream());
+            //in = new DataInputStream(clientSocket.getInputStream());
+            //out = new DataOutputStream(clientSocket.getOutputStream());
             //this.start();
+            ois = new ObjectInputStream(clientSocket.getInputStream());
+            oos = new ObjectOutputStream(clientSocket.getOutputStream());
+
         } catch (IOException e) {
             System.out.println("Connection: " + e.getMessage());
         }
@@ -39,31 +44,37 @@ class Connection extends Thread {
     @Override
     public void run() {
         try {
-            String clientRequest;
+            //String clientRequest;
+            Message message;
 
             do {
-                clientRequest = in.readUTF();
-                System.out.println("Received in Connection Thread line: " + clientRequest);
+                //clientRequest = in.readUTF();
+                message = (Message) (ois.readObject());
 
-                String serverResponse = "Hello " + clientRequest;
-                out.writeUTF(serverResponse);
-            } while (clientRequest != null && !DONE.equalsIgnoreCase(clientRequest.trim()));
+                System.out.println("Received in Connection Thread line: " + message.getMessage());
+
+                // String serverResponse = "Hello " + message.getMessage();
+                oos.writeObject(message);
+                // out.writeUTF(serverResponse);
+            } while (message.getMessage() != null && !DONE.equalsIgnoreCase(message.getMessage().trim()));
 
             System.out.println("Closing connection with " + clientSocket.getInetAddress());
         } catch (IOException e) {
             System.out.println(e.getMessage());
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                if (out != null) {
-                    out.close();
+                if (oos != null) {
+                    oos.close();
                 }
-                if (in != null) {
-                    in.close();
+                if (ois != null) {
+                    ois.close();
                 }
                 if (clientSocket != null) {
                     clientSocket.close();
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
         }

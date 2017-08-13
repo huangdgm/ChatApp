@@ -28,25 +28,25 @@ public class ChatGUI extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanelConnection = new javax.swing.JPanel();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
+        jTextFieldServerIP = new javax.swing.JTextField();
+        jTextFieldServerPort = new javax.swing.JTextField();
+        jTextFieldYourName = new javax.swing.JTextField();
         jLabelServerIP = new javax.swing.JLabel();
         jLabelServerPort = new javax.swing.JLabel();
         jLabelYourName = new javax.swing.JLabel();
         jButtonConnect = new javax.swing.JButton();
         jButtonDisconnect = new javax.swing.JButton();
         jPanelFriendList = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        jScrollPaneFriendList = new javax.swing.JScrollPane();
+        jListFriendList = new javax.swing.JList<>();
         jPanelChatHistory = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        jScrollPaneChatHistory = new javax.swing.JScrollPane();
         jTextAreaChatHistory = new javax.swing.JTextArea();
-        jPanelMessage = new javax.swing.JPanel();
+        jPanelMessageInput = new javax.swing.JPanel();
         jButtonSend = new javax.swing.JButton();
         jCheckBoxBroadcast = new javax.swing.JCheckBox();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jTextAreaMessage = new javax.swing.JTextArea();
+        jScrollPaneMessageInput = new javax.swing.JScrollPane();
+        jTextAreaMessageInput = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("ChatClient");
@@ -54,9 +54,9 @@ public class ChatGUI extends javax.swing.JFrame {
 
         jPanelConnection.setBorder(javax.swing.BorderFactory.createTitledBorder("Connection"));
 
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+        jTextFieldServerPort.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
+                jTextFieldServerPortActionPerformed(evt);
             }
         });
 
@@ -70,6 +70,7 @@ public class ChatGUI extends javax.swing.JFrame {
 
         jButtonDisconnect.setText("Disconnect");
         jButtonDisconnect.setActionCommand("");
+        jButtonDisconnect.setEnabled(false);
 
         javax.swing.GroupLayout jPanelConnectionLayout = new javax.swing.GroupLayout(jPanelConnection);
         jPanelConnection.setLayout(jPanelConnectionLayout);
@@ -82,9 +83,9 @@ public class ChatGUI extends javax.swing.JFrame {
                     .addComponent(jLabelYourName, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField1)
-                    .addComponent(jTextField2)
-                    .addComponent(jTextField3)))
+                    .addComponent(jTextFieldServerIP)
+                    .addComponent(jTextFieldServerPort)
+                    .addComponent(jTextFieldYourName)))
             .addGroup(jPanelConnectionLayout.createSequentialGroup()
                 .addComponent(jButtonConnect, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -95,15 +96,15 @@ public class ChatGUI extends javax.swing.JFrame {
             jPanelConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelConnectionLayout.createSequentialGroup()
                 .addGroup(jPanelConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextFieldServerIP, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabelServerIP))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextFieldServerPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabelServerPort))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextFieldYourName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabelYourName))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanelConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -113,22 +114,22 @@ public class ChatGUI extends javax.swing.JFrame {
 
         jPanelFriendList.setBorder(javax.swing.BorderFactory.createTitledBorder("Friend List"));
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
+        jListFriendList.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane2.setViewportView(jList1);
+        jScrollPaneFriendList.setViewportView(jListFriendList);
 
         javax.swing.GroupLayout jPanelFriendListLayout = new javax.swing.GroupLayout(jPanelFriendList);
         jPanelFriendList.setLayout(jPanelFriendListLayout);
         jPanelFriendListLayout.setHorizontalGroup(
             jPanelFriendListLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2)
+            .addComponent(jScrollPaneFriendList)
         );
         jPanelFriendListLayout.setVerticalGroup(
             jPanelFriendListLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(jScrollPaneFriendList, javax.swing.GroupLayout.Alignment.TRAILING)
         );
 
         jPanelChatHistory.setBorder(javax.swing.BorderFactory.createTitledBorder("Chat History"));
@@ -136,45 +137,45 @@ public class ChatGUI extends javax.swing.JFrame {
         jTextAreaChatHistory.setEditable(false);
         jTextAreaChatHistory.setColumns(20);
         jTextAreaChatHistory.setRows(5);
-        jScrollPane1.setViewportView(jTextAreaChatHistory);
+        jScrollPaneChatHistory.setViewportView(jTextAreaChatHistory);
 
         javax.swing.GroupLayout jPanelChatHistoryLayout = new javax.swing.GroupLayout(jPanelChatHistory);
         jPanelChatHistory.setLayout(jPanelChatHistoryLayout);
         jPanelChatHistoryLayout.setHorizontalGroup(
             jPanelChatHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 308, Short.MAX_VALUE)
+            .addComponent(jScrollPaneChatHistory, javax.swing.GroupLayout.DEFAULT_SIZE, 308, Short.MAX_VALUE)
         );
         jPanelChatHistoryLayout.setVerticalGroup(
             jPanelChatHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jScrollPaneChatHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
-        jPanelMessage.setBorder(javax.swing.BorderFactory.createTitledBorder("Message Input"));
+        jPanelMessageInput.setBorder(javax.swing.BorderFactory.createTitledBorder("Message Input"));
 
         jButtonSend.setText("Send");
 
         jCheckBoxBroadcast.setText("Broadcast");
 
-        jTextAreaMessage.setColumns(20);
-        jTextAreaMessage.setRows(5);
-        jScrollPane3.setViewportView(jTextAreaMessage);
+        jTextAreaMessageInput.setColumns(20);
+        jTextAreaMessageInput.setRows(5);
+        jScrollPaneMessageInput.setViewportView(jTextAreaMessageInput);
 
-        javax.swing.GroupLayout jPanelMessageLayout = new javax.swing.GroupLayout(jPanelMessage);
-        jPanelMessage.setLayout(jPanelMessageLayout);
-        jPanelMessageLayout.setHorizontalGroup(
-            jPanelMessageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelMessageLayout.createSequentialGroup()
+        javax.swing.GroupLayout jPanelMessageInputLayout = new javax.swing.GroupLayout(jPanelMessageInput);
+        jPanelMessageInput.setLayout(jPanelMessageInputLayout);
+        jPanelMessageInputLayout.setHorizontalGroup(
+            jPanelMessageInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelMessageInputLayout.createSequentialGroup()
                 .addComponent(jCheckBoxBroadcast)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButtonSend))
-            .addComponent(jScrollPane3)
+            .addComponent(jScrollPaneMessageInput)
         );
-        jPanelMessageLayout.setVerticalGroup(
-            jPanelMessageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelMessageLayout.createSequentialGroup()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        jPanelMessageInputLayout.setVerticalGroup(
+            jPanelMessageInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelMessageInputLayout.createSequentialGroup()
+                .addComponent(jScrollPaneMessageInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanelMessageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanelMessageInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonSend)
                     .addComponent(jCheckBoxBroadcast)))
         );
@@ -190,7 +191,7 @@ public class ChatGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanelChatHistory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanelMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(jPanelMessageInput, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -201,15 +202,15 @@ public class ChatGUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanelChatHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jPanelMessage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanelMessageInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+    private void jTextFieldServerPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldServerPortActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField2ActionPerformed
+    }//GEN-LAST:event_jTextFieldServerPortActionPerformed
 
     /**
      * @param args the command line arguments
@@ -254,18 +255,18 @@ public class ChatGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabelServerIP;
     private javax.swing.JLabel jLabelServerPort;
     private javax.swing.JLabel jLabelYourName;
-    private javax.swing.JList<String> jList1;
+    private javax.swing.JList<String> jListFriendList;
     private javax.swing.JPanel jPanelChatHistory;
     private javax.swing.JPanel jPanelConnection;
     private javax.swing.JPanel jPanelFriendList;
-    private javax.swing.JPanel jPanelMessage;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JPanel jPanelMessageInput;
+    private javax.swing.JScrollPane jScrollPaneChatHistory;
+    private javax.swing.JScrollPane jScrollPaneFriendList;
+    private javax.swing.JScrollPane jScrollPaneMessageInput;
     private javax.swing.JTextArea jTextAreaChatHistory;
-    private javax.swing.JTextArea jTextAreaMessage;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
+    private javax.swing.JTextArea jTextAreaMessageInput;
+    private javax.swing.JTextField jTextFieldServerIP;
+    private javax.swing.JTextField jTextFieldServerPort;
+    private javax.swing.JTextField jTextFieldYourName;
     // End of variables declaration//GEN-END:variables
 }

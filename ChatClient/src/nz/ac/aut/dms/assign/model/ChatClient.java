@@ -37,12 +37,14 @@ public class ChatClient {
             byte[] buf = new byte[256];
             MulticastSocket multicastSocket = new MulticastSocket(MULTICAST_PORT);
             multicastSocket.joinGroup(multicastAddress);
-            DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
-            multicastSocket.receive(msgPacket);
+            DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
+            // The receive method blocks until receiving a datagram packet
+            multicastSocket.receive(datagramPacket);
             String msg = new String(buf, 0, buf.length);
-            System.out.println("Socket 1 received msg: " + msg);
+            System.out.println("Received msg: " + msg);
 
             chatClientTCPSocket = new ChatClientSocket(InetAddress.getLocalHost(), SERVER_PORT);
+            System.out.println("Connection made with " + chatClientTCPSocket.getInetAddress() + ":" + chatClientTCPSocket.getPort());
         } catch (IOException e) {
             System.out.println("Client could not make connection: " + e.getMessage());
         }

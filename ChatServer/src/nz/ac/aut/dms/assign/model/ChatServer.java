@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,39 +15,51 @@ import java.util.logging.Logger;
  */
 public class ChatServer {
 
+    // Local tcp port listening for incoming requests
     private static final int SERVER_TCP_PORT = 8765;
-    private static final int MULTICAST_PORT = 8767;
-    private static ChatServerSocket chatServerSocket = null;
-    private static DatagramSocket UDPSocket = null;
+    // The multicase ip address to which the server send broadcast messages
     private static String MULTICAST_ADDR = "224.0.0.4";
+    // The multicast port to which the server send broadcast messages
+    private static final int MULTICAST_PORT = 8767;
+    // The server socket which is used to create connections to the clients
+    private static ChatServerSocket chatServerSocket = null;
+    // The datagram socket which is used to send broadcast messages
+    private static DatagramSocket datagramSocket = null;
+    // A boolean flag checking whether the server should continue running
     private static boolean stopServer = false;
+    
+    private static ArrayList<User> users = null;
 
     public static void startServer() {
-
-        try {
-            chatServerSocket = new ChatServerSocket(SERVER_TCP_PORT);
-            System.out.println("Server started at " + InetAddress.getLocalHost() + " on TCP port " + SERVER_TCP_PORT);
-
-            InetAddress multicastAddress = InetAddress.getByName(MULTICAST_ADDR);
-            UDPSocket = new DatagramSocket();
-
-            String broadcastMessage = "new user dong connected.";
-            DatagramPacket broadcastDatagramPacket = new DatagramPacket(broadcastMessage.getBytes(),broadcastMessage.getBytes().length, multicastAddress, MULTICAST_PORT);
-            UDPSocket.send(broadcastDatagramPacket);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+        users = new ArrayList<User>();
 
         while (!stopServer) {
             try {
-                // create a seperate UDPSocket to connect to the client
-                Socket clientSocket = chatServerSocket.accept();
+                chatServerSocket = new ChatServerSocket(SERVER_TCP_PORT);
+                System.out.println("Server started at " + InetAddress.getLocalHost() + " on TCP port " + SERVER_TCP_PORT);
 
+                InetAddress multicastAddress = InetAddress.getByName(MULTICAST_ADDR);
+                datagramSocket = new DatagramSocket();
+
+                Message message = new BroadcastMessage("user dong connected", "dong", multicastAddress);
+                DatagramPacket broadcastDatagramPacket = new DatagramPacket(message.getMessage().getBytes(), message.getMessage().getBytes().length, multicastAddress, MULTICAST_PORT);
+                datagramSocket.send(broadcastDatagramPacket);
+                Thread.sleep(2000);
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ChatServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            try {
+                // create a seperate datagramSocket to connect to the client
+                Socket clientSocket = chatServerSocket.accept();
+                
                 System.out.println("Connection made with " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
 
-                Connection connection = new Connection(clientSocket);
+                ChatServerThread chatServerThread = new ChatServerThread(clientSocket);
 
-                connection.start();
+                chatServerThread.start();
 
                 System.out.println("Processed the client and started connection");
             } catch (IOException e) {

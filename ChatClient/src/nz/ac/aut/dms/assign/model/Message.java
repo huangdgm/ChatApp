@@ -7,9 +7,6 @@ package nz.ac.aut.dms.assign.model;
 
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  *

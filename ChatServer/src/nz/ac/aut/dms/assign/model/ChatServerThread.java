@@ -16,20 +16,22 @@ import java.util.logging.Logger;
  *
  * @author Dong Huang
  */
-class Connection extends Thread {
+class ChatServerThread extends Thread {
 
     final String DONE = "done";
     ObjectInputStream ois = null;
     ObjectOutputStream oos = null;
     Socket clientSocket = null;
+    User user = null;
 
     /**
      *
      * @param clientSocket
      */
-    public Connection(Socket clientSocket) {
+    public ChatServerThread(Socket clientSocket) {
+        this.clientSocket = clientSocket;
+
         try {
-            this.clientSocket = clientSocket;
             ois = new ObjectInputStream(clientSocket.getInputStream());
             oos = new ObjectOutputStream(clientSocket.getOutputStream());
         } catch (IOException e) {
@@ -39,22 +41,29 @@ class Connection extends Thread {
 
     @Override
     public void run() {
-        try {
-            Message message;
+        Message message;
 
+        try {
             do {
                 message = (Message) (ois.readObject());
-
+                
+                User user = new User();
+                
+                user.setInetAddress(clientSocket.getInetAddress());
+                user.setUsername(message.getUserName());
+                user.setOnline(true);
+                user.setPort(clientSocket.getPort());
+                
                 System.out.println("Received in Connection Thread line: " + message.getMessage());
 
                 oos.writeObject(message);
             } while (message.getMessage() != null && !DONE.equalsIgnoreCase(message.getMessage().trim()));
 
-            System.out.println("Closing connection with " + clientSocket.getInetAddress());
+            System.out.println("Closing connection with " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
         } catch (IOException e) {
             System.out.println(e.getMessage());
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ChatServerThread.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 if (oos != null) {

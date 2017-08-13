@@ -30,12 +30,8 @@ class Connection extends Thread {
     public Connection(Socket clientSocket) {
         try {
             this.clientSocket = clientSocket;
-            //in = new DataInputStream(clientSocket.getInputStream());
-            //out = new DataOutputStream(clientSocket.getOutputStream());
-            //this.start();
             ois = new ObjectInputStream(clientSocket.getInputStream());
             oos = new ObjectOutputStream(clientSocket.getOutputStream());
-
         } catch (IOException e) {
             System.out.println("Connection: " + e.getMessage());
         }
@@ -44,18 +40,14 @@ class Connection extends Thread {
     @Override
     public void run() {
         try {
-            //String clientRequest;
             Message message;
 
             do {
-                //clientRequest = in.readUTF();
                 message = (Message) (ois.readObject());
 
                 System.out.println("Received in Connection Thread line: " + message.getMessage());
 
-                // String serverResponse = "Hello " + message.getMessage();
                 oos.writeObject(message);
-                // out.writeUTF(serverResponse);
             } while (message.getMessage() != null && !DONE.equalsIgnoreCase(message.getMessage().trim()));
 
             System.out.println("Closing connection with " + clientSocket.getInetAddress());

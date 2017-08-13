@@ -5,12 +5,13 @@
  */
 package nz.ac.aut.dms.assign.model;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,27 +22,34 @@ import java.util.logging.Logger;
  */
 public class ChatClient {
 
-    private static ChatClientSocket chatClientSocket = null;
+    private static ChatClientSocket chatClientTCPSocket = null;
+    private static DatagramSocket UDPSocket = null;
     private static final int SERVER_PORT = 8765;
+    private static String MULTICAST_ADDR = "224.0.0.4";
+    private static final int MULTICAST_PORT = 8767;
     private static String username = "dong";
 
     public static void startClient() {
         Scanner keyboardInputScanner = new Scanner(System.in);
-        //DataOutputStream output = null;
-        //DataInputStream input = null;
 
         try {
-            chatClientSocket = new ChatClientSocket(InetAddress.getLocalHost(), SERVER_PORT);
+            InetAddress multicastAddress = InetAddress.getByName(MULTICAST_ADDR);
+            byte[] buf = new byte[256];
+            MulticastSocket multicastSocket = new MulticastSocket(MULTICAST_PORT);
+            multicastSocket.joinGroup(multicastAddress);
+            DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
+            multicastSocket.receive(msgPacket);
+            String msg = new String(buf, 0, buf.length);
+            System.out.println("Socket 1 received msg: " + msg);
+
+            chatClientTCPSocket = new ChatClientSocket(InetAddress.getLocalHost(), SERVER_PORT);
         } catch (IOException e) {
             System.out.println("Client could not make connection: " + e.getMessage());
         }
 
         try {
-            //output = new DataOutputStream(chatClientSocket.getOutputStream());
-            //input = new DataInputStream(chatClientSocket.getInputStream());
-            
-            ObjectOutputStream oos = new ObjectOutputStream(chatClientSocket.getOutputStream());
-            ObjectInputStream ois = new ObjectInputStream(chatClientSocket.getInputStream());
+            ObjectOutputStream oos = new ObjectOutputStream(chatClientTCPSocket.getOutputStream());
+            ObjectInputStream ois = new ObjectInputStream(chatClientTCPSocket.getInputStream());
 
             System.out.println("Enter text or done to exit.");
 
@@ -49,14 +57,11 @@ public class ChatClient {
 
             do {
                 clientRequest = keyboardInputScanner.nextLine();
-                //output.writeUTF(clientRequest);
-                
+
                 PrivateMessage pm = new PrivateMessage(clientRequest, username, InetAddress.getLocalHost());
                 oos.writeObject(pm);
 
-                //String serverResponse = input.readUTF();
-                
-                Message obj = (Message)(ois.readObject());
+                Message obj = (Message) (ois.readObject());
                 System.out.println("Server response: " + obj.getMessage());
             } while (!"done".equalsIgnoreCase(clientRequest.trim()));
         } catch (IOException e) {

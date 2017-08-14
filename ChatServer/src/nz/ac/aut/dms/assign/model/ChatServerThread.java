@@ -44,16 +44,21 @@ class ChatServerThread extends Thread {
         Message message;
 
         try {
+            message = (Message) (ois.readObject());
+
+            User user = new User();
+
+            user.setInetAddress(clientSocket.getInetAddress());
+            user.setUsername(message.getUserName());
+            user.setOnline(true);
+            user.setPort(clientSocket.getPort());
+
+            System.out.println("Connection made with " + user.getUsername() + user.getInetAddress() + ":" + user.getPort());
+            oos.writeObject(message);
+
             do {
                 message = (Message) (ois.readObject());
-                
-                User user = new User();
-                
-                user.setInetAddress(clientSocket.getInetAddress());
-                user.setUsername(message.getUserName());
-                user.setOnline(true);
-                user.setPort(clientSocket.getPort());
-                
+
                 System.out.println("Received in Connection Thread line: " + message.getMessage());
 
                 oos.writeObject(message);

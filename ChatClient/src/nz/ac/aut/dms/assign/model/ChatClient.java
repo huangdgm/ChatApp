@@ -43,18 +43,24 @@ public class ChatClient {
             String msg = new String(buf, 0, buf.length);
             System.out.println("Received msg: " + msg);
 
-            chatClientTCPSocket = new ChatClientSocket(InetAddress.getLocalHost(), SERVER_PORT);
-            System.out.println("Connection made with " + chatClientTCPSocket.getInetAddress() + ":" + chatClientTCPSocket.getPort());
         } catch (IOException e) {
             System.out.println("Client could not make connection: " + e.getMessage());
         }
 
         try {
+            Message message = null;
+            chatClientTCPSocket = new ChatClientSocket(InetAddress.getLocalHost(), SERVER_PORT);
+            
             ObjectOutputStream oos = new ObjectOutputStream(chatClientTCPSocket.getOutputStream());
             ObjectInputStream ois = new ObjectInputStream(chatClientTCPSocket.getInputStream());
 
-            System.out.println("Enter text or done to exit.");
+            HandshakeMessage handshakeMessage = new HandshakeMessage("this is handshake message", username, InetAddress.getLocalHost());
+            oos.writeObject(handshakeMessage);
+            message = (Message) (ois.readObject());
 
+            System.out.println("Connection made with " + chatClientTCPSocket.getInetAddress() + ":" + chatClientTCPSocket.getPort());
+
+            System.out.println("Enter text or done to exit.");
             String clientRequest;
 
             do {
@@ -63,8 +69,8 @@ public class ChatClient {
                 PrivateMessage pm = new PrivateMessage(clientRequest, username, InetAddress.getLocalHost());
                 oos.writeObject(pm);
 
-                Message obj = (Message) (ois.readObject());
-                System.out.println("Server response: " + obj.getMessage());
+                message = (Message) (ois.readObject());
+                System.out.println("Server response: " + message.getMessage());
             } while (!"done".equalsIgnoreCase(clientRequest.trim()));
         } catch (IOException e) {
             System.out.println("Client error: " + e.getMessage());

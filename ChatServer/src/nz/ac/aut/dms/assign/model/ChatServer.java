@@ -55,8 +55,6 @@ public class ChatServer {
                 // create a seperate datagramSocket to connect to the client
                 Socket clientSocket = chatServerSocket.accept();
                 
-                System.out.println("Connection made with " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
-
                 ChatServerThread chatServerThread = new ChatServerThread(clientSocket);
 
                 chatServerThread.start();

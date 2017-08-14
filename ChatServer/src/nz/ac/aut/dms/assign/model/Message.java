@@ -13,7 +13,7 @@ import java.util.Date;
 
 /**
  *
- * @author Administrator
+ * @author Dong Huang
  */
 public abstract class Message implements Serializable {
 
@@ -25,19 +25,19 @@ public abstract class Message implements Serializable {
         this.message = message;
         this.userName = userName;
         this.destinationInetAddress = destinationInetAddress;
-        //this.date = new Date();
     }
+
+    public abstract void process();
 
     public String getMessage() {
         return message;
     }
-    
+
     //public String getDate() {
     //    DateFormat dateFormatter = new SimpleDateFormat("yyyyMMddHHmmss");
     //    
     //    return dateFormatter.format(date);
     //}
-
     /**
      * @param message the message to set
      */

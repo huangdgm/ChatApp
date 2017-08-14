@@ -17,4 +17,9 @@ public class HandshakeMessage extends Message {
         super(message, userName, destinationInetAddress);
     }
 
+    @Override
+    public String getMessageType() {
+        return "HANDSHAKE";
+    }
+
 }

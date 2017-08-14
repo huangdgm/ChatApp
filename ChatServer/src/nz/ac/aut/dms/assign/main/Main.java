@@ -5,14 +5,25 @@
  */
 package nz.ac.aut.dms.assign.main;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import nz.ac.aut.dms.assign.model.ChatServer;
+import nz.ac.aut.dms.assign.model.User;
+import nz.ac.aut.dms.assign.model.Buffer;
 
 /**
  *
- * @author Administrator
+ * @author Dong Huang
  */
 public class Main {
+
     public static void main(String[] args) {
-        ChatServer.startServer();
+        HashMap<String, User> users = new HashMap<>();
+        ArrayList<Thread> threadPool = new ArrayList<>();
+        Buffer buffer = new Buffer();
+
+        ChatServer chatServer = new ChatServer(users, threadPool, buffer);
+
+        chatServer.startServer();
     }
 }

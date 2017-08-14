@@ -76,5 +76,9 @@ public class User {
         this.port = port;
     }
     
+    @Override
+    public String toString() {
+        return this.username;
+    }
     
 }

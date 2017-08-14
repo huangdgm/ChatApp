@@ -6,6 +6,7 @@
 package nz.ac.aut.dms.assign.model;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 /**
  *
@@ -16,5 +17,10 @@ public class DisconnectMessage extends Message {
     public DisconnectMessage(String message, String userName, InetAddress destinationInetAddress) {
         super(message, userName, destinationInetAddress);
     }
-    
+
+    @Override
+    public String getMessageType() {
+        return "DISCONNECT";
+    }
+
 }

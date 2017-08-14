@@ -18,16 +18,16 @@ import java.util.Date;
 public abstract class Message implements Serializable {
 
     private String message = null;
-    private String userName = null;
+    private String username = null;
     private InetAddress destinationInetAddress = null;
 
     public Message(String message, String userName, InetAddress destinationInetAddress) {
         this.message = message;
-        this.userName = userName;
+        this.username = userName;
         this.destinationInetAddress = destinationInetAddress;
     }
 
-    public abstract void process();
+    public abstract String getMessageType();
 
     public String getMessage() {
         return message;
@@ -46,17 +46,17 @@ public abstract class Message implements Serializable {
     }
 
     /**
-     * @return the userName
+     * @return the username
      */
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
     /**
-     * @param userName the userName to set
+     * @param username the username to set
      */
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     /**

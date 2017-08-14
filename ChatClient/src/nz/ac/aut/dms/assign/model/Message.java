@@ -7,34 +7,37 @@ package nz.ac.aut.dms.assign.model;
 
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
- * @author Administrator
+ * @author Dong Huang
  */
 public abstract class Message implements Serializable {
 
     private String message = null;
-    private String userName = null;
+    private String username = null;
     private InetAddress destinationInetAddress = null;
 
     public Message(String message, String userName, InetAddress destinationInetAddress) {
         this.message = message;
-        this.userName = userName;
+        this.username = userName;
         this.destinationInetAddress = destinationInetAddress;
-        //this.date = new Date();
     }
+
+    public abstract String getMessageType();
 
     public String getMessage() {
         return message;
     }
-    
+
     //public String getDate() {
     //    DateFormat dateFormatter = new SimpleDateFormat("yyyyMMddHHmmss");
     //    
     //    return dateFormatter.format(date);
     //}
-
     /**
      * @param message the message to set
      */
@@ -43,17 +46,17 @@ public abstract class Message implements Serializable {
     }
 
     /**
-     * @return the userName
+     * @return the username
      */
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
     /**
-     * @param userName the userName to set
+     * @param username the username to set
      */
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     /**

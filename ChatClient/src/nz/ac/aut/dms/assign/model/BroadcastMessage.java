@@ -16,5 +16,10 @@ public class BroadcastMessage extends Message {
     public BroadcastMessage(String message, String userName, InetAddress destinationInetAddress) {
         super(message, userName, destinationInetAddress);
     }
+
+    @Override
+    public String getMessageType() {
+        return "BROADCAST";
+    }
     
 }

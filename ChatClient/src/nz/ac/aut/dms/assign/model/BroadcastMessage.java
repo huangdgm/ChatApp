@@ -13,13 +13,13 @@ import java.net.InetAddress;
  */
 public class BroadcastMessage extends Message {
 
-    public BroadcastMessage(String message, String userName, InetAddress destinationInetAddress) {
-        super(message, userName, destinationInetAddress);
+    public BroadcastMessage(String message, String fromUser, String toUser,InetAddress destinationInetAddress, int destinationPort) {
+        super(message, fromUser, toUser, destinationInetAddress, destinationPort);
     }
 
     @Override
     public String getMessageType() {
         return "BROADCAST";
     }
-    
+
 }

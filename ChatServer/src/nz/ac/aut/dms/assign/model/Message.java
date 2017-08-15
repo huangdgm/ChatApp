@@ -18,13 +18,17 @@ import java.util.Date;
 public abstract class Message implements Serializable {
 
     private String message = null;
-    private String username = null;
+    private String fromUser = null;
+    private String toUser = null;
     private InetAddress destinationInetAddress = null;
+    private int destinationPort = 0;
 
-    public Message(String message, String userName, InetAddress destinationInetAddress) {
+    public Message(String message, String fromUser, String toUser, InetAddress destinationInetAddress, int destinationPort) {
         this.message = message;
-        this.username = userName;
+        this.fromUser = fromUser;
+        this.toUser = toUser;
         this.destinationInetAddress = destinationInetAddress;
+        this.destinationPort = destinationPort;
     }
 
     public abstract String getMessageType();
@@ -33,11 +37,6 @@ public abstract class Message implements Serializable {
         return message;
     }
 
-    //public String getDate() {
-    //    DateFormat dateFormatter = new SimpleDateFormat("yyyyMMddHHmmss");
-    //    
-    //    return dateFormatter.format(date);
-    //}
     /**
      * @param message the message to set
      */
@@ -46,17 +45,31 @@ public abstract class Message implements Serializable {
     }
 
     /**
-     * @return the username
+     * @return the fromUser
      */
-    public String getUsername() {
-        return username;
+    public String getFromUser() {
+        return fromUser;
     }
 
     /**
-     * @param username the username to set
+     * @param fromUser the fromUser to set
      */
-    public void setUsername(String username) {
-        this.username = username;
+    public void setFromUser(String fromUser) {
+        this.fromUser = fromUser;
+    }
+
+    /**
+     * @return the toUser
+     */
+    public String getToUser() {
+        return toUser;
+    }
+
+    /**
+     * @param toUser the toUser to set
+     */
+    public void setToUser(String toUser) {
+        this.toUser = toUser;
     }
 
     /**
@@ -72,4 +85,20 @@ public abstract class Message implements Serializable {
     public void setDestinationInetAddress(InetAddress destinationInetAddress) {
         this.destinationInetAddress = destinationInetAddress;
     }
+
+    /**
+     * @return the destinationPort
+     */
+    public int getDestinationPort() {
+        return destinationPort;
+    }
+
+    /**
+     * @param destinationPort the destinationPort to set
+     */
+    public void setDestinationPort(int destinationPort) {
+        this.destinationPort = destinationPort;
+    }
+
+    
 }

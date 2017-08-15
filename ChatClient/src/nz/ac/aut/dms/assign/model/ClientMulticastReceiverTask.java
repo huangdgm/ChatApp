@@ -14,9 +14,9 @@ import java.net.MulticastSocket;
  *
  * @author Dong Huang
  */
-class ClientUDPConnectionTask implements Runnable {
+class ClientMulticastReceiverTask implements Runnable {
 
-    public ClientUDPConnectionTask() {
+    public ClientMulticastReceiverTask() {
     }
 
     @Override
@@ -32,7 +32,6 @@ class ClientUDPConnectionTask implements Runnable {
                 multicastSocket.receive(datagramPacket);
                 String msg = new String(buf, 0, buf.length);
                 System.out.println("Received msg: " + msg);
-
             } catch (IOException e) {
                 System.out.println("Client could not make connection: " + e.getMessage());
                 ChatClient.stopClient = true;

@@ -40,18 +40,18 @@ public class ChatServer {
     }
 
     public void startServer() {
-        // start a thread for broadcasting udp datagrams
-        ServerUDPConnectionTask udpConnectionTask = new ServerUDPConnectionTask(datagramSocket, users, buffer);
-        Thread udpConnectionThread = new Thread(udpConnectionTask);
+        // start a thread for broadcasting datagrams
+        ServerMulticastSenderTask serverMulticastSenderTask = new ServerMulticastSenderTask(users, buffer);
+        Thread serverMulticastSenderThread = new Thread(serverMulticastSenderTask);
 
-        udpConnectionThread.start();
+        serverMulticastSenderThread.start();
 
         try {
             chatServerSocket = new ChatServerSocket(SERVER_TCP_PORT);
         } catch (IOException ex) {
             Logger.getLogger(ChatServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         while (!stopServer) {
 
             try {
@@ -59,12 +59,18 @@ public class ChatServer {
 
                 Socket clientSocket = chatServerSocket.accept();
 
-                ServerTCPConnectionTask tcpConnectionTask = new ServerTCPConnectionTask(clientSocket, users, buffer);
-                Thread tcpConnectionThread = new Thread(tcpConnectionTask);
+                ServerTCPReceiverTask serverTCPReceiverTask = new ServerTCPReceiverTask(clientSocket, users, buffer);
+                ServerTCPSenderTask serverTCPSenderTask = new ServerTCPSenderTask(clientSocket, buffer);
 
-                tcpConnectionThread.start();
+                Thread serverTCPReceiverThread = new Thread(serverTCPReceiverTask);
+                Thread serverTCPSenderThread = new Thread(serverTCPSenderTask);
 
-                threadPool.add(tcpConnectionThread);
+                // start a tcp thread for receiving
+                serverTCPReceiverThread.start();
+                // start a tcp thread for sending
+                serverTCPSenderThread.start();
+
+                threadPool.add(serverTCPReceiverThread);
             } catch (IOException e) {
                 System.err.println("Can not accept client connection: " + e.getMessage());
                 stopServer = true;

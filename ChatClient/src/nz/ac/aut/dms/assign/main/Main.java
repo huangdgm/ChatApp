@@ -5,14 +5,26 @@
  */
 package nz.ac.aut.dms.assign.main;
 
+import nz.ac.aut.dms.assign.gui.ChatGUI;
 import nz.ac.aut.dms.assign.model.ChatClient;
 
 /**
  *
- * @author Administrator
+ * @author Dong Huang
  */
 public class Main {
+
     public static void main(String[] args) {
-        ChatClient.startClient();
+        ChatClient chatClient = new ChatClient();
+
+        ChatGUI gui = new ChatGUI(chatClient);
+
+        // make the GUI visible
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                gui.setVisible(true);
+            }
+        });
     }
 }

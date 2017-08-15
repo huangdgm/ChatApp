@@ -6,13 +6,8 @@
 package nz.ac.aut.dms.assign.model;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.util.Scanner;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,23 +19,35 @@ public class ChatClient {
 
     public static final String MULTICAST_ADDR = "224.0.0.4";
     public static final int MULTICAST_PORT = 8767;
-    public static boolean stopClient = false;
     public static final int SERVER_PORT = 8765;
+    public static boolean stopClient = false;
 
-    //private static ChatClientSocket chatClientTCPSocket = null;
-    //private static DatagramSocket UDPSocket = null;
+    private ChatClientSocket chatClientTCPSocket = null;
 
-    public static void startClient() {
-        // start udp thread for receiving broadcast messages of current connected clients
-        ClientUDPConnectionTask clientUDPConnectionTask = new ClientUDPConnectionTask();
-        Thread clientUDPConnectionThread = new Thread(clientUDPConnectionTask);
+    public ChatClient() {
+        try {
+            chatClientTCPSocket = new ChatClientSocket(InetAddress.getLocalHost(), SERVER_PORT);
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
-        clientUDPConnectionThread.start();
+    public void startClient() {
+        // start udp thread for receiving broadcast messages from the server
+        ClientMulticastReceiverTask clientMulticastReceiverTask = new ClientMulticastReceiverTask();
+        Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
+        clientMulticastReceiverThread.start();
 
-        // start tcp thread for communicating with the server tcp thread
-        ClientTCPConnectionTask clientTCPConnectionTask = new ClientTCPConnectionTask();
-        Thread clientTCPConnectionThread = new Thread(clientTCPConnectionTask);
-        
-        clientTCPConnectionThread.start();
+        // start tcp thread for sending unicast messages to the server
+        ClientTCPSenderTask clientTCPConnectionTask = new ClientTCPSenderTask(chatClientTCPSocket);
+        Thread clientTCPSenderThread = new Thread(clientTCPConnectionTask);
+        clientTCPSenderThread.start();
+
+        // start tcp thread for receiving unicast messages from the server
+        ClientTCPReceiverTask clientTCPReceiverTask = new ClientTCPReceiverTask(chatClientTCPSocket);
+        Thread clientTCPReceiverThread = new Thread(clientTCPReceiverTask);
+        clientTCPReceiverThread.start();
     }
 }

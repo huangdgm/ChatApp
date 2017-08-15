@@ -5,59 +5,47 @@
  */
 package nz.ac.aut.dms.assign.model;
 
+import java.util.HashMap;
+
 /**
  *
  * @author Dong Huang
  */
 public class Buffer {
-    private String message = null;
-    private String username = null;
-    private boolean bufferFull = false;
+
+    private HashMap<String, Message> messages = null;
+    private boolean bufferEmpty = true;
 
     public Buffer() {
+        messages = new HashMap<String, Message>();
     }
 
     /**
-     * @return the message
+     * @return the messages
      */
-    public String getMessage() {
-        return message;
+    public HashMap<String, Message> getMessages() {
+        return messages;
     }
 
     /**
-     * @param message the message to set
+     * @param messages the messages to set
      */
-    public void setMessage(String message) {
-        this.message = message;
+    public void setMessages(HashMap<String, Message> messages) {
+        this.messages = messages;
     }
 
     /**
-     * @return the username
+     * @return the bufferEmpty
      */
-    public String getUsername() {
-        return username;
+    public boolean isBufferEmpty() {
+        return bufferEmpty;
     }
 
     /**
-     * @param username the username to set
+     * @param bufferEmpty the bufferEmpty to set
      */
-    public void setUsername(String username) {
-        this.username = username;
+    public void setBufferEmpty(boolean bufferEmpty) {
+        this.bufferEmpty = bufferEmpty;
     }
 
-    /**
-     * @return the bufferFull
-     */
-    public boolean isBufferFull() {
-        return bufferFull;
-    }
-
-    /**
-     * @param bufferFull the bufferFull to set
-     */
-    public void setBufferFull(boolean bufferFull) {
-        this.bufferFull = bufferFull;
-    }
-    
-    
 }

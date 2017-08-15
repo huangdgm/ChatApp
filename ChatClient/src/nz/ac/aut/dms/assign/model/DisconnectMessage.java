@@ -14,8 +14,8 @@ import java.util.ArrayList;
  */
 public class DisconnectMessage extends Message {
 
-    public DisconnectMessage(String message, String userName, InetAddress destinationInetAddress) {
-        super(message, userName, destinationInetAddress);
+    public DisconnectMessage(String message, String fromUser, String toUser,InetAddress destinationInetAddress, int destinationPort) {
+        super(message, fromUser, toUser, destinationInetAddress, destinationPort);
     }
 
     @Override

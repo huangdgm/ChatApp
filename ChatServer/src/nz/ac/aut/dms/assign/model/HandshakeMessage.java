@@ -12,9 +12,8 @@ import java.net.InetAddress;
  * @author Administrator
  */
 public class HandshakeMessage extends Message {
-
-    public HandshakeMessage(String message, String userName, InetAddress destinationInetAddress) {
-        super(message, userName, destinationInetAddress);
+    public HandshakeMessage(String message, String fromUser, String toUser,InetAddress destinationInetAddress, int destinationPort) {
+        super(message, fromUser, toUser, destinationInetAddress, destinationPort);
     }
 
     @Override

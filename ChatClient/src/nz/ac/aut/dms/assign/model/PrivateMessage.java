@@ -13,8 +13,8 @@ import java.net.InetAddress;
  */
 public class PrivateMessage extends Message {
 
-    public PrivateMessage(String message, String userName, InetAddress destinationInetAddress) {
-        super(message, userName, destinationInetAddress);
+    public PrivateMessage(String message, String fromUser, String toUser, InetAddress destinationInetAddress, int destinationPort) {
+        super(message, fromUser, toUser, destinationInetAddress, destinationPort);
     }
 
     @Override

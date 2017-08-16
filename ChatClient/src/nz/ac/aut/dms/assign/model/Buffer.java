@@ -5,19 +5,10 @@
  */
 package nz.ac.aut.dms.assign.model;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-
 /**
  *
  * @author Administrator
  */
-public class ChatServerSocket extends ServerSocket {
-
-    //private final int serverPort;
-
-    public ChatServerSocket(int serverPort) throws IOException {
-        super(serverPort);
-    }
-
+public class Buffer {
+    
 }

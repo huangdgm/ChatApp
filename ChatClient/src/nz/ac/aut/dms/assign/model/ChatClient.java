@@ -5,12 +5,6 @@
  */
 package nz.ac.aut.dms.assign.model;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  *
  * @author Dong Huang
@@ -22,32 +16,59 @@ public class ChatClient {
     public static final int SERVER_PORT = 8765;
     public static boolean stopClient = false;
 
-    private ChatClientSocket chatClientTCPSocket = null;
+    //private ChatClientSocket chatClientTCPSocket = null;
+    private ChatEventListener chatEventListener;
 
     public ChatClient() {
-        try {
-            chatClientTCPSocket = new ChatClientSocket(InetAddress.getLocalHost(), SERVER_PORT);
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     public void startClient() {
-        // start udp thread for receiving broadcast messages from the server
-        ClientMulticastReceiverTask clientMulticastReceiverTask = new ClientMulticastReceiverTask();
-        Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
-        clientMulticastReceiverThread.start();
+//        // start tcp thread for sending unicast messages to the server
+//        ClientTCPSenderTask clientTCPConnectionTask = new ClientTCPSenderTask(getChatClientTCPSocket());
+//        Thread clientTCPSenderThread = new Thread(clientTCPConnectionTask);
+//        clientTCPSenderThread.start();
+//
+//        // start tcp thread for receiving unicast messages from the server
+//        ClientTCPReceiverTask clientTCPReceiverTask = new ClientTCPReceiverTask(getChatClientTCPSocket());
+//        Thread clientTCPReceiverThread = new Thread(clientTCPReceiverTask);
+//        clientTCPReceiverThread.start();
+//
+//        // start udp thread for receiving broadcast messages from the server
+//        ClientMulticastReceiverTask clientMulticastReceiverTask = new ClientMulticastReceiverTask();
+//        Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
+//        clientMulticastReceiverThread.start();
+    }
 
-        // start tcp thread for sending unicast messages to the server
-        ClientTCPSenderTask clientTCPConnectionTask = new ClientTCPSenderTask(chatClientTCPSocket);
-        Thread clientTCPSenderThread = new Thread(clientTCPConnectionTask);
-        clientTCPSenderThread.start();
+//    /**
+//     * @return the chatClientTCPSocket
+//     */
+//    public ChatClientSocket getChatClientTCPSocket() {
+//        return chatClientTCPSocket;
+//    }
+//
+//    /**
+//     * @param chatClientTCPSocket the chatClientTCPSocket to set
+//     */
+//    public void setChatClientTCPSocket(ChatClientSocket chatClientTCPSocket) {
+//        this.chatClientTCPSocket = chatClientTCPSocket;
+//    }
+    /**
+     * @return the chatEventListener
+     */
+    public ChatEventListener getChatEventListener() {
+        return chatEventListener;
+    }
 
-        // start tcp thread for receiving unicast messages from the server
-        ClientTCPReceiverTask clientTCPReceiverTask = new ClientTCPReceiverTask(chatClientTCPSocket);
-        Thread clientTCPReceiverThread = new Thread(clientTCPReceiverTask);
-        clientTCPReceiverThread.start();
+    /**
+     * @param chatEventListener the chatEventListener to set
+     */
+    public void setChatEventListener(ChatEventListener chatEventListener) {
+        this.chatEventListener = chatEventListener;
+    }
+
+    private void notifyChatEventListener() {
+        if (chatEventListener != null) {
+            getChatEventListener().chatStateChanged();
+        }
     }
 }

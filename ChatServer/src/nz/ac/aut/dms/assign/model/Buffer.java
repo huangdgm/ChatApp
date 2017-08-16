@@ -13,32 +13,32 @@ import java.util.HashMap;
  */
 public class Buffer {
 
-    private HashMap<String, Message> messages = null;
+    private HashMap<String, FullMessage> fullMessages = null;
     private boolean bufferEmpty = true;
 
     public Buffer() {
-        messages = new HashMap<String, Message>();
+        fullMessages = new HashMap<String, FullMessage>();
     }
 
     /**
-     * @return the messages
+     * @return the fullMessages
      */
-    public HashMap<String, Message> getMessages() {
-        return messages;
+    public HashMap<String, FullMessage> getFullMessages() {
+        return fullMessages;
     }
 
     /**
-     * @param messages the messages to set
+     * @param fullMessages the fullMessages to set
      */
-    public void setMessages(HashMap<String, Message> messages) {
-        this.messages = messages;
+    public void setFullMessages(HashMap<String, FullMessage> fullMessages) {
+        this.fullMessages = fullMessages;
     }
 
     /**
      * @return the bufferEmpty
      */
     public boolean isBufferEmpty() {
-        return bufferEmpty;
+        return fullMessages.isEmpty();
     }
 
     /**
@@ -47,5 +47,7 @@ public class Buffer {
     public void setBufferEmpty(boolean bufferEmpty) {
         this.bufferEmpty = bufferEmpty;
     }
+
+    
 
 }

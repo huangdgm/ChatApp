@@ -40,7 +40,8 @@ public class ServerMulticastSenderTask implements Runnable {
         while (!ChatServer.stopServer) {
             try {
                 InetAddress multicastAddress = InetAddress.getByName(ChatServer.MULTICAST_ADDR);
-                Message message = new BroadcastMessage("connected users: " + users.toString(), "SERVER", "ALL", multicastAddress, ChatServer.MULTICAST_PORT);
+                Message message = new BroadcastMessage(users.keySet().toString(), "SERVER", "ALL");
+                System.out.println("Connected clients: " + users.keySet().toString());
                 DatagramPacket broadcastDatagramPacket = new DatagramPacket(message.getMessage().getBytes(), message.getMessage().getBytes().length, multicastAddress, ChatServer.MULTICAST_PORT);
                 
                 datagramSocket.send(broadcastDatagramPacket);

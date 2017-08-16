@@ -19,10 +19,9 @@ public class Main {
 
     public static void main(String[] args) {
         HashMap<String, User> users = new HashMap<>();
-        ArrayList<Thread> threadPool = new ArrayList<>();
         Buffer buffer = new Buffer();
 
-        ChatServer chatServer = new ChatServer(users, threadPool, buffer);
+        ChatServer chatServer = new ChatServer(users, buffer);
 
         chatServer.startServer();
     }

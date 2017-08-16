@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Administrator
+ * @author Dong Huang
  */
 public class ServerTCPSenderTask implements Runnable {
 
@@ -34,16 +34,19 @@ public class ServerTCPSenderTask implements Runnable {
 
     @Override
     public void run() {
-        while (buffer.isBufferEmpty() == false) {
-            for (Message message : buffer.getMessages().values()) {
-                if (message.getDestinationInetAddress() == clientSocket.getInetAddress() && message.getDestinationPort() == clientSocket.getPort()) {
-                    try {
-                        oos.writeObject(message);
-                    } catch (IOException ex) {
-                        Logger.getLogger(ServerTCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
+
+        while (true) {
+            if (buffer.isBufferEmpty() == false) {
+                for (FullMessage fullMessage : buffer.getFullMessages().values()) {
+                    if (fullMessage.getInetAddress() == clientSocket.getInetAddress() && fullMessage.getPort() == clientSocket.getPort()) {
+                        try {
+                            oos.writeObject(fullMessage.getMessage());
+                        } catch (IOException ex) {
+                            Logger.getLogger(ServerTCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        buffer.getFullMessages().remove(fullMessage.getMessage().getToUser());
                     }
-                    
-                    buffer.getMessages().remove(message.getToUser());
                 }
             }
         }

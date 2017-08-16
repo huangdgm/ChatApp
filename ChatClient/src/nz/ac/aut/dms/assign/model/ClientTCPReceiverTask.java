@@ -12,21 +12,24 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import nz.ac.aut.dms.assign.gui.ChatGUI;
 
 /**
  *
- * @author Administrator
+ * @author Dong Huang
  */
 public class ClientTCPReceiverTask implements Runnable {
 
-    ChatClientSocket chatClientTCPSocket = null;
+    Socket tcpSocket = null;
     ObjectInputStream ois = null;
+    ChatGUI chatGUI = null;
 
-    public ClientTCPReceiverTask(ChatClientSocket chatClientTCPSocket) {
-        this.chatClientTCPSocket = chatClientTCPSocket;
+    public ClientTCPReceiverTask(Socket tcpSocket, ChatGUI chatGUI) {
+        this.tcpSocket = tcpSocket;
+        this.chatGUI = chatGUI;
 
         try {
-            ois = new ObjectInputStream(chatClientTCPSocket.getInputStream());
+            ois = new ObjectInputStream(tcpSocket.getInputStream());
         } catch (IOException e) {
             System.out.println("Connection: " + e.getMessage());
         }
@@ -35,14 +38,18 @@ public class ClientTCPReceiverTask implements Runnable {
     @Override
     public void run() {
         Message message = null;
-        // After the tcp connection is made, the server read the user information from the HandshakeMessage
 
         do {
             try {
                 message = (Message) (ois.readObject());
-                System.out.println("Received in Connection Thread line: " + message.getMessage());
             } catch (IOException | ClassNotFoundException ex) {
+                Logger.getLogger(ClientTCPReceiverTask.class.getName()).log(Level.SEVERE, null, ex);
                 ChatClient.stopClient = true;
+            }
+
+            // Update the chat history
+            if (message != null) {
+                chatGUI.getUsersAndChatHistory().put(message.getFromUser(), message.getFromUser() + " : " + message.getMessage() + "\n");
             }
         } while (!ChatClient.stopClient);
 
@@ -50,14 +57,14 @@ public class ClientTCPReceiverTask implements Runnable {
             if (ois != null) {
                 ois.close();
             }
-            if (chatClientTCPSocket != null) {
-                chatClientTCPSocket.close();
+            if (tcpSocket != null) {
+                tcpSocket.close();
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
 
-        System.out.println("Closing connection with " + chatClientTCPSocket.getInetAddress() + ":" + chatClientTCPSocket.getPort());
+        System.out.println("Closing connection with " + tcpSocket.getInetAddress() + ":" + tcpSocket.getPort());
     }
 
 }

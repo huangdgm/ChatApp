@@ -6,29 +6,30 @@
 package nz.ac.aut.dms.assign.model;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.Socket;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import nz.ac.aut.dms.assign.gui.ChatGUI;
 
 /**
  *
- * @author Administrator
+ * @author Dong Huang
  */
 public class ClientTCPSenderTask implements Runnable {
 
-    private int i = (int) (Math.random() * 100);
+    private Socket tcpSocket = null;
+    private ChatGUI chatGUI = null;
     private ObjectOutputStream oos = null;
-    private ChatClientSocket chatClientTCPSocket = null;
 
-    public ClientTCPSenderTask(ChatClientSocket chatClientTCPSocket) {
-        this.chatClientTCPSocket = chatClientTCPSocket;
-        
+    public ClientTCPSenderTask(Socket tcpSocket, ChatGUI chatGUI) {
+        this.tcpSocket = tcpSocket;
+        this.chatGUI = chatGUI;
+
         try {
-            oos = new ObjectOutputStream(chatClientTCPSocket.getOutputStream());
+            oos = new ObjectOutputStream(tcpSocket.getOutputStream());
         } catch (IOException ex) {
             Logger.getLogger(ClientTCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -36,36 +37,70 @@ public class ClientTCPSenderTask implements Runnable {
 
     @Override
     public void run() {
-        Scanner keyboardInputScanner = new Scanner(System.in);
+        HandshakeMessage handshakeMessage = new HandshakeMessage("handshake message", chatGUI.getjTextFieldYourName().getText(), "SERVER");
 
         try {
-            HandshakeMessage handshakeMessage = new HandshakeMessage("this is handshake message", "dong-" + i, "SERVER", InetAddress.getLocalHost(), ChatClient.SERVER_PORT);
             oos.writeObject(handshakeMessage);
-            // message = (Message) (ois.readObject());
+        } catch (IOException ex) {
+            Logger.getLogger(ChatGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-            System.out.println("Connection made with " + chatClientTCPSocket.getInetAddress() + ":" + chatClientTCPSocket.getPort());
-
-            System.out.println("Enter text or done to exit.");
-            String clientRequest;
-
+        try {
             do {
-                clientRequest = keyboardInputScanner.nextLine();
+                String input = chatGUI.getjTextAreaMessageInput().getText();
+                String toUser = chatGUI.getjListFriendList().getSelectedValue();
+                String fromUser = chatGUI.getjTextFieldYourName().getText();
 
-                if (!clientRequest.equals("done")) {
-                    PrivateMessage pm = new PrivateMessage(clientRequest, "dong-" + i, "TOUSER", InetAddress.getLocalHost(), ChatClient.SERVER_PORT);
-                    oos.writeObject(pm);
-                    //message = (Message) (ois.readObject());
-                    //System.out.println("Server response: " + message.getMessage());
+                if (input != null && !(chatGUI.getjListFriendList().isSelectionEmpty())) {
+                    chatGUI.getjButtonSend().setEnabled(true);
                 } else {
-                    DisconnectMessage dm = new DisconnectMessage(clientRequest, "dong-" + i, "SERVER", InetAddress.getLocalHost(), ChatClient.SERVER_PORT);
-                    oos.writeObject(dm);
+                    chatGUI.getjButtonSend().setEnabled(false);
                 }
-            } while (!"done".equalsIgnoreCase(clientRequest.trim()));
+
+                if (chatGUI.isSendButtonPressed()) {
+                    
+                    if (chatGUI.getjCheckBoxBroadcast().isSelected()) {
+                        toUser = "ALL";
+                        BroadcastMessage bm = new BroadcastMessage(input, fromUser, toUser);
+                        oos.writeObject(bm);
+
+                        // Update the GUI
+                        chatGUI.getjTextAreaChatHistory().append(bm.getFromUser() + " : " + bm.getMessage() + "\n");
+                        chatGUI.getjTextAreaMessageInput().setText("");
+                        chatGUI.getjButtonSend().setEnabled(false);
+
+                        chatGUI.getUsersAndChatHistory().put(bm.getFromUser(), bm.getFromUser() + " : " + bm.getMessage() + "\n");
+                        chatGUI.setSendButtonPressed(false);
+                    } else {
+                        PrivateMessage pm = new PrivateMessage(input, fromUser, toUser);
+                        oos.writeObject(pm);
+
+                        // Update the GUI
+                        chatGUI.getjTextAreaChatHistory().append(pm.getFromUser() + " : " + pm.getMessage() + "\n");
+                        chatGUI.getjTextAreaMessageInput().setText("");
+                        chatGUI.getjButtonSend().setEnabled(false);
+
+                        chatGUI.getUsersAndChatHistory().put(pm.getFromUser(), pm.getFromUser() + " : " + pm.getMessage() + "\n");
+                        chatGUI.setSendButtonPressed(false);
+                    }
+                }
+            } while (true);
         } catch (IOException e) {
             System.out.println("Client error: " + e.getMessage());
         } finally {
             ChatClient.stopClient = true;
         }
-    }
 
+        try {
+            if (oos != null) {
+                oos.close();
+            }
+            if (tcpSocket != null) {
+                tcpSocket.close();
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
 }

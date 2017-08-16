@@ -20,15 +20,11 @@ public abstract class Message implements Serializable {
     private String message = null;
     private String fromUser = null;
     private String toUser = null;
-    private InetAddress destinationInetAddress = null;
-    private int destinationPort = 0;
 
-    public Message(String message, String fromUser, String toUser, InetAddress destinationInetAddress, int destinationPort) {
+    public Message(String message, String fromUser, String toUser) {
         this.message = message;
         this.fromUser = fromUser;
         this.toUser = toUser;
-        this.destinationInetAddress = destinationInetAddress;
-        this.destinationPort = destinationPort;
     }
 
     public abstract String getMessageType();
@@ -72,33 +68,4 @@ public abstract class Message implements Serializable {
         this.toUser = toUser;
     }
 
-    /**
-     * @return the destinationInetAddress
-     */
-    public InetAddress getDestinationInetAddress() {
-        return destinationInetAddress;
-    }
-
-    /**
-     * @param destinationInetAddress the destinationInetAddress to set
-     */
-    public void setDestinationInetAddress(InetAddress destinationInetAddress) {
-        this.destinationInetAddress = destinationInetAddress;
-    }
-
-    /**
-     * @return the destinationPort
-     */
-    public int getDestinationPort() {
-        return destinationPort;
-    }
-
-    /**
-     * @param destinationPort the destinationPort to set
-     */
-    public void setDestinationPort(int destinationPort) {
-        this.destinationPort = destinationPort;
-    }
-
-    
 }

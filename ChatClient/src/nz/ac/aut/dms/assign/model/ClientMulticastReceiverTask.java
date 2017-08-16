@@ -9,18 +9,24 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import nz.ac.aut.dms.assign.gui.ChatGUI;
 
 /**
  *
  * @author Dong Huang
  */
-class ClientMulticastReceiverTask implements Runnable {
+public class ClientMulticastReceiverTask implements Runnable {
 
-    public ClientMulticastReceiverTask() {
+    private ChatGUI chatGUI = null;
+
+    public ClientMulticastReceiverTask(ChatGUI chatGUI) {
+        this.chatGUI = chatGUI;
     }
 
     @Override
     public void run() {
+        String previousUsers = null;
+
         while (!ChatClient.stopClient) {
             try {
                 InetAddress multicastAddress = InetAddress.getByName(ChatClient.MULTICAST_ADDR);
@@ -31,7 +37,13 @@ class ClientMulticastReceiverTask implements Runnable {
                 // The receive method blocks until receiving a datagram packet
                 multicastSocket.receive(datagramPacket);
                 String msg = new String(buf, 0, buf.length);
-                System.out.println("Received msg: " + msg);
+
+                // If there's update with the friendlist, then update the jList
+                if (!msg.equals(previousUsers)) {
+                    chatGUI.getjListFriendList().setListData(msg.substring(1, msg.indexOf("]")).split(", "));
+                }
+
+                previousUsers = msg;
             } catch (IOException e) {
                 System.out.println("Client could not make connection: " + e.getMessage());
                 ChatClient.stopClient = true;

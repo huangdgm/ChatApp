@@ -9,12 +9,12 @@ import java.net.InetAddress;
 
 /**
  *
- * @author Administrator
+ * @author Dong Huang
  */
 public class PrivateMessage extends Message {
 
-    public PrivateMessage(String message, String fromUser, String toUser, InetAddress destinationInetAddress, int destinationPort) {
-        super(message, fromUser, toUser, destinationInetAddress, destinationPort);
+    public PrivateMessage(String message, String fromUser, String toUser) {
+        super(message, fromUser, toUser);
     }
 
     @Override

@@ -47,6 +47,7 @@ class ServerTCPReceiverTask implements Runnable {
     @Override
     public void run() {
         Message message = null;
+        FullMessage fullMessage = null;
         String messageType = null;
         // After the tcp connection is made, the server read the user information from the HandshakeMessage
 
@@ -63,8 +64,16 @@ class ServerTCPReceiverTask implements Runnable {
                         users.remove(message.getFromUser());
                         break;
                     case "PRIVATE":
+                        fullMessage = new FullMessage((PrivateMessage)message);
+                        fullMessage.setInetAddress(clientSocket.getInetAddress());
+                        fullMessage.setPort(clientSocket.getPort());
+                        buffer.getFullMessages().put(message.getToUser(), fullMessage);
+                        break;
                     case "BROADCAST":
-                        buffer.getMessages().put(message.getToUser(), message);
+                        fullMessage = new FullMessage((BroadcastMessage)message);
+                        fullMessage.setInetAddress(clientSocket.getInetAddress());
+                        fullMessage.setPort(clientSocket.getPort());
+                        buffer.getFullMessages().put(message.getToUser(), fullMessage);
                         break;
                     case "HANDSHAKE":
                         setUser(clientSocket, message);
@@ -76,7 +85,9 @@ class ServerTCPReceiverTask implements Runnable {
                 Logger.getLogger(ServerTCPReceiverTask.class.getName()).log(Level.SEVERE, null, ex);
                 ChatServer.stopServer = true;
             }
-        } while (!ChatServer.stopServer && message.getMessage() != null && !DONE.equalsIgnoreCase(message.getMessage().trim()));
+        } while (!ChatServer.stopServer
+                && message.getMessage()
+                != null && !DONE.equalsIgnoreCase(message.getMessage().trim()));
 
         try {
             if (ois != null) {

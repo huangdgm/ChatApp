@@ -3,8 +3,8 @@ package nz.ac.aut.dms.assign.model;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,17 +25,15 @@ public class ChatServer {
     public static boolean stopServer = false;
 
     // The server socket which is used to create connections to the clients
-    private ChatServerSocket chatServerSocket = null;
+    private ServerSocket serverSocket = null;
     // The datagram socket which is used to send broadcast messages
     private DatagramSocket datagramSocket = null;
 
     private HashMap<String, User> users = null;
-    private ArrayList<Thread> threadPool = null;
     private Buffer buffer = null;
 
-    public ChatServer(HashMap<String, User> users, ArrayList<Thread> threadPool, Buffer buffer) {
+    public ChatServer(HashMap<String, User> users, Buffer buffer) {
         this.users = users;
-        this.threadPool = threadPool;
         this.buffer = buffer;
     }
 
@@ -47,17 +45,19 @@ public class ChatServer {
         serverMulticastSenderThread.start();
 
         try {
-            chatServerSocket = new ChatServerSocket(SERVER_TCP_PORT);
+            serverSocket = new ServerSocket(SERVER_TCP_PORT);
         } catch (IOException ex) {
             Logger.getLogger(ChatServer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        Socket clientSocket = null;
+        
         while (!stopServer) {
 
             try {
                 System.out.println("Server started at " + InetAddress.getLocalHost() + " on TCP port " + SERVER_TCP_PORT);
 
-                Socket clientSocket = chatServerSocket.accept();
+                clientSocket = serverSocket.accept();
 
                 ServerTCPReceiverTask serverTCPReceiverTask = new ServerTCPReceiverTask(clientSocket, users, buffer);
                 ServerTCPSenderTask serverTCPSenderTask = new ServerTCPSenderTask(clientSocket, buffer);
@@ -69,8 +69,6 @@ public class ChatServer {
                 serverTCPReceiverThread.start();
                 // start a tcp thread for sending
                 serverTCPSenderThread.start();
-
-                threadPool.add(serverTCPReceiverThread);
             } catch (IOException e) {
                 System.err.println("Can not accept client connection: " + e.getMessage());
                 stopServer = true;
@@ -78,7 +76,7 @@ public class ChatServer {
         }
 
         try {
-            chatServerSocket.close();
+            serverSocket.close();
         } catch (IOException ex) {
             Logger.getLogger(ChatServer.class.getName()).log(Level.SEVERE, null, ex);
         }

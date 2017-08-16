@@ -25,3 +25,5 @@ hs_err_pid*
 /ChatServer/build/
 /ChatClient/build/
 /ChatClient/dist/
+/JavaApplication9/nbproject/private/
+/JavaApplication9/build/

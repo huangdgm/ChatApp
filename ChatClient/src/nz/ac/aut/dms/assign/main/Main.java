@@ -5,7 +5,10 @@
  */
 package nz.ac.aut.dms.assign.main;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import nz.ac.aut.dms.assign.gui.ChatGUI;
+import nz.ac.aut.dms.assign.model.Buffer;
 import nz.ac.aut.dms.assign.model.ChatClient;
 
 /**
@@ -16,8 +19,9 @@ public class Main {
 
     public static void main(String[] args) {
         ChatClient chatClient = new ChatClient();
+        Buffer buffer = new Buffer();
 
-        ChatGUI gui = new ChatGUI(chatClient);
+        ChatGUI gui = new ChatGUI(chatClient, buffer);
 
         // make the GUI visible
         java.awt.EventQueue.invokeLater(new Runnable() {

@@ -15,11 +15,11 @@ import nz.ac.aut.dms.assign.gui.ChatGUI;
  *
  * @author Dong Huang
  */
-public class ClientMulticastReceiverTask implements Runnable {
+public class MulticastTask implements Runnable {
 
     private ChatGUI chatGUI = null;
 
-    public ClientMulticastReceiverTask(ChatGUI chatGUI) {
+    public MulticastTask(ChatGUI chatGUI) {
         this.chatGUI = chatGUI;
     }
 
@@ -27,11 +27,11 @@ public class ClientMulticastReceiverTask implements Runnable {
     public void run() {
         String previousUsers = null;
 
-        while (!ChatClient.stopClient) {
+        while (!Client.stopClient) {
             try {
-                InetAddress multicastAddress = InetAddress.getByName(ChatClient.MULTICAST_ADDR);
+                InetAddress multicastAddress = InetAddress.getByName(Client.MULTICAST_ADDR);
                 byte[] buf = new byte[256];
-                MulticastSocket multicastSocket = new MulticastSocket(ChatClient.MULTICAST_PORT);
+                MulticastSocket multicastSocket = new MulticastSocket(Client.MULTICAST_PORT);
                 multicastSocket.joinGroup(multicastAddress);
                 DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
                 // The receive method blocks until receiving a datagram packet
@@ -46,7 +46,7 @@ public class ClientMulticastReceiverTask implements Runnable {
                 previousUsers = msg;
             } catch (IOException e) {
                 System.out.println("Client could not make connection: " + e.getMessage());
-                ChatClient.stopClient = true;
+                Client.stopClient = true;
             }
         }
     }

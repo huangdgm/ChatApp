@@ -16,13 +16,13 @@ import nz.ac.aut.dms.assign.gui.ChatGUI;
  *
  * @author Dong Huang
  */
-public class ClientTCPReceiverTask implements Runnable {
+public class TCPTask implements Runnable {
 
     Socket tcpSocket = null;
     ObjectInputStream ois = null;
     ChatGUI chatGUI = null;
 
-    public ClientTCPReceiverTask(Socket tcpSocket, ChatGUI chatGUI) {
+    public TCPTask(Socket tcpSocket, ChatGUI chatGUI) {
         this.tcpSocket = tcpSocket;
         this.chatGUI = chatGUI;
         
@@ -42,8 +42,8 @@ public class ClientTCPReceiverTask implements Runnable {
             try {
                 message = (Message) (ois.readObject());
             } catch (IOException | ClassNotFoundException ex) {
-                Logger.getLogger(ClientTCPReceiverTask.class.getName()).log(Level.SEVERE, null, ex);
-                ChatClient.stopClient = true;
+                Logger.getLogger(TCPTask.class.getName()).log(Level.SEVERE, null, ex);
+                Client.stopClient = true;
             }
 
             if (message != null) {
@@ -57,7 +57,7 @@ public class ClientTCPReceiverTask implements Runnable {
                         break;
                 }
             }
-        } while (!ChatClient.stopClient);
+        } while (!Client.stopClient);
 
         try {
             if (ois != null) {

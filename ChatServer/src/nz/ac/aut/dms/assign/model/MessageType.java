@@ -5,12 +5,10 @@
  */
 package nz.ac.aut.dms.assign.model;
 
-import sun.awt.CharsetString;
-
 /**
  *
- * @author Administrator
+ * @author xfn
  */
-public enum ChatStatus {
-    CONNECTED, DISCONNECTED
+public enum MessageType {
+    PRIVATE, BROADCAST, CONNECT, DISCONNECT
 }

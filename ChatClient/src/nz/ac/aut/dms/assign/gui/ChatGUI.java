@@ -14,12 +14,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractListModel;
 import javax.swing.JOptionPane;
-import nz.ac.aut.dms.assign.model.Buffer;
-import nz.ac.aut.dms.assign.model.ChatClient;
-import nz.ac.aut.dms.assign.model.ChatStatus;
-import nz.ac.aut.dms.assign.model.ClientTCPReceiverTask;
+import nz.ac.aut.dms.assign.model.Client;
+import nz.ac.aut.dms.assign.model.ClientStatus;
+import nz.ac.aut.dms.assign.model.TCPTask;
 import nz.ac.aut.dms.assign.model.ClientTCPSenderTask;
-import nz.ac.aut.dms.assign.model.ClientMulticastReceiverTask;
+import nz.ac.aut.dms.assign.model.MulticastTask;
 
 /**
  *
@@ -30,17 +29,13 @@ public class ChatGUI extends javax.swing.JFrame {
     /**
      * Creates new form ChatGUI
      *
-     * @param chatClient
-     * @param buffer
+     * @param client
      */
-    public ChatGUI(ChatClient chatClient, Buffer buffer) {
-        this.chatClient = chatClient;
-
-        usersAndChatHistory = new HashMap<>();
-
+    public ChatGUI(Client client) {
+        assert client != null : "Make sure client object is created before GUI";
+        this.client = client;
+        setAsGameListener();
         initComponents();
-        initializeChatWindow();
-
         update();
     }
 
@@ -290,7 +285,7 @@ public class ChatGUI extends javax.swing.JFrame {
                     "Connection failed. Please try again.", "Warning",
                     JOptionPane.INFORMATION_MESSAGE);
         }
-        
+
         System.out.println("connection made with the server.");
 
         getjTextFieldServerIP().setEnabled(false);
@@ -303,7 +298,7 @@ public class ChatGUI extends javax.swing.JFrame {
         getjCheckBoxBroadcast().setEnabled(true);
 
         // start udp thread for receiving broadcast messages from the server
-        ClientMulticastReceiverTask clientMulticastReceiverTask = new ClientMulticastReceiverTask(this);
+        MulticastTask clientMulticastReceiverTask = new MulticastTask(this);
         Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
         clientMulticastReceiverThread.start();
 
@@ -313,7 +308,7 @@ public class ChatGUI extends javax.swing.JFrame {
         clientTCPSenderThread.start();
 
         // start tcp thread for receiving unicast messages from the server
-        ClientTCPReceiverTask clientTCPReceiverTask = new ClientTCPReceiverTask(tcpSocket, this);
+        TCPTask clientTCPReceiverTask = new TCPTask(tcpSocket, this);
         Thread clientTCPReceiverThread = new Thread(clientTCPReceiverTask);
         clientTCPReceiverThread.start();
     }//GEN-LAST:event_jButtonConnectActionPerformed
@@ -350,8 +345,8 @@ public class ChatGUI extends javax.swing.JFrame {
     private javax.swing.JTextField jTextFieldYourName;
     // End of variables declaration//GEN-END:variables
 
-    private ChatClient chatClient = null;
-    private ChatStatus chatStatus = null;
+    private Client client = null;
+    private ClientStatus chatStatus = null;
     private HashMap<String, String> usersAndChatHistory = null;
     private boolean sendButtonPressed = false;
     private Socket tcpSocket = null;
@@ -361,342 +356,22 @@ public class ChatGUI extends javax.swing.JFrame {
     }
 
     private void update() {
+        // update connection panel
+        
+        // update friend list panel
+        jListFriendList.setListData(client.getConnectedClients());
+        jListFriendList.clearSelection();
+        
+        // update chat history panel
+        
+        
+        // update message input panel
+        //jTextAreaMessageInput.setText("");
+        jButtonSend.setEnabled(client.isSendPossible());
+        jCheckBoxBroadcast.setSelected(false);
     }
 
-    /**
-     * @return the jListFriendList
-     */
-    public javax.swing.JList<String> getjListFriendList() {
-        return jListFriendList;
+    private void setAsGameListener() {
+        client.addChatEventListener(this);
     }
-
-    /**
-     * @param jListFriendList the jListFriendList to set
-     */
-    public void setjListFriendList(javax.swing.JList<String> jListFriendList) {
-        this.jListFriendList = jListFriendList;
-    }
-
-    /**
-     * @return the jButtonConnect
-     */
-    public javax.swing.JButton getjButtonConnect() {
-        return jButtonConnect;
-    }
-
-    /**
-     * @param jButtonConnect the jButtonConnect to set
-     */
-    public void setjButtonConnect(javax.swing.JButton jButtonConnect) {
-        this.jButtonConnect = jButtonConnect;
-    }
-
-    /**
-     * @return the jButtonDisconnect
-     */
-    public javax.swing.JButton getjButtonDisconnect() {
-        return jButtonDisconnect;
-    }
-
-    /**
-     * @param jButtonDisconnect the jButtonDisconnect to set
-     */
-    public void setjButtonDisconnect(javax.swing.JButton jButtonDisconnect) {
-        this.jButtonDisconnect = jButtonDisconnect;
-    }
-
-    /**
-     * @return the jButtonSend
-     */
-    public javax.swing.JButton getjButtonSend() {
-        return jButtonSend;
-    }
-
-    /**
-     * @param jButtonSend the jButtonSend to set
-     */
-    public void setjButtonSend(javax.swing.JButton jButtonSend) {
-        this.jButtonSend = jButtonSend;
-    }
-
-    /**
-     * @return the jCheckBoxBroadcast
-     */
-    public javax.swing.JCheckBox getjCheckBoxBroadcast() {
-        return jCheckBoxBroadcast;
-    }
-
-    /**
-     * @param jCheckBoxBroadcast the jCheckBoxBroadcast to set
-     */
-    public void setjCheckBoxBroadcast(javax.swing.JCheckBox jCheckBoxBroadcast) {
-        this.jCheckBoxBroadcast = jCheckBoxBroadcast;
-    }
-
-    /**
-     * @return the jLabelServerIP
-     */
-    public javax.swing.JLabel getjLabelServerIP() {
-        return jLabelServerIP;
-    }
-
-    /**
-     * @param jLabelServerIP the jLabelServerIP to set
-     */
-    public void setjLabelServerIP(javax.swing.JLabel jLabelServerIP) {
-        this.jLabelServerIP = jLabelServerIP;
-    }
-
-    /**
-     * @return the jLabelServerPort
-     */
-    public javax.swing.JLabel getjLabelServerPort() {
-        return jLabelServerPort;
-    }
-
-    /**
-     * @param jLabelServerPort the jLabelServerPort to set
-     */
-    public void setjLabelServerPort(javax.swing.JLabel jLabelServerPort) {
-        this.jLabelServerPort = jLabelServerPort;
-    }
-
-    /**
-     * @return the jLabelYourName
-     */
-    public javax.swing.JLabel getjLabelYourName() {
-        return jLabelYourName;
-    }
-
-    /**
-     * @param jLabelYourName the jLabelYourName to set
-     */
-    public void setjLabelYourName(javax.swing.JLabel jLabelYourName) {
-        this.jLabelYourName = jLabelYourName;
-    }
-
-    /**
-     * @return the jPanelChatHistory
-     */
-    public javax.swing.JPanel getjPanelChatHistory() {
-        return jPanelChatHistory;
-    }
-
-    /**
-     * @param jPanelChatHistory the jPanelChatHistory to set
-     */
-    public void setjPanelChatHistory(javax.swing.JPanel jPanelChatHistory) {
-        this.jPanelChatHistory = jPanelChatHistory;
-    }
-
-    /**
-     * @return the jPanelConnection
-     */
-    public javax.swing.JPanel getjPanelConnection() {
-        return jPanelConnection;
-    }
-
-    /**
-     * @param jPanelConnection the jPanelConnection to set
-     */
-    public void setjPanelConnection(javax.swing.JPanel jPanelConnection) {
-        this.jPanelConnection = jPanelConnection;
-    }
-
-    /**
-     * @return the jPanelFriendList
-     */
-    public javax.swing.JPanel getjPanelFriendList() {
-        return jPanelFriendList;
-    }
-
-    /**
-     * @param jPanelFriendList the jPanelFriendList to set
-     */
-    public void setjPanelFriendList(javax.swing.JPanel jPanelFriendList) {
-        this.jPanelFriendList = jPanelFriendList;
-    }
-
-    /**
-     * @return the jPanelMessageInput
-     */
-    public javax.swing.JPanel getjPanelMessageInput() {
-        return jPanelMessageInput;
-    }
-
-    /**
-     * @param jPanelMessageInput the jPanelMessageInput to set
-     */
-    public void setjPanelMessageInput(javax.swing.JPanel jPanelMessageInput) {
-        this.jPanelMessageInput = jPanelMessageInput;
-    }
-
-    /**
-     * @return the jScrollPaneChatHistory
-     */
-    public javax.swing.JScrollPane getjScrollPaneChatHistory() {
-        return jScrollPaneChatHistory;
-    }
-
-    /**
-     * @param jScrollPaneChatHistory the jScrollPaneChatHistory to set
-     */
-    public void setjScrollPaneChatHistory(javax.swing.JScrollPane jScrollPaneChatHistory) {
-        this.jScrollPaneChatHistory = jScrollPaneChatHistory;
-    }
-
-    /**
-     * @return the jScrollPaneFriendList
-     */
-    public javax.swing.JScrollPane getjScrollPaneFriendList() {
-        return jScrollPaneFriendList;
-    }
-
-    /**
-     * @param jScrollPaneFriendList the jScrollPaneFriendList to set
-     */
-    public void setjScrollPaneFriendList(javax.swing.JScrollPane jScrollPaneFriendList) {
-        this.jScrollPaneFriendList = jScrollPaneFriendList;
-    }
-
-    /**
-     * @return the jScrollPaneMessageInput
-     */
-    public javax.swing.JScrollPane getjScrollPaneMessageInput() {
-        return jScrollPaneMessageInput;
-    }
-
-    /**
-     * @param jScrollPaneMessageInput the jScrollPaneMessageInput to set
-     */
-    public void setjScrollPaneMessageInput(javax.swing.JScrollPane jScrollPaneMessageInput) {
-        this.jScrollPaneMessageInput = jScrollPaneMessageInput;
-    }
-
-    /**
-     * @return the jTextAreaChatHistory
-     */
-    public javax.swing.JTextArea getjTextAreaChatHistory() {
-        return jTextAreaChatHistory;
-    }
-
-    /**
-     * @param jTextAreaChatHistory the jTextAreaChatHistory to set
-     */
-    public void setjTextAreaChatHistory(javax.swing.JTextArea jTextAreaChatHistory) {
-        this.jTextAreaChatHistory = jTextAreaChatHistory;
-    }
-
-    /**
-     * @return the jTextAreaMessageInput
-     */
-    public javax.swing.JTextArea getjTextAreaMessageInput() {
-        return jTextAreaMessageInput;
-    }
-
-    /**
-     * @param jTextAreaMessageInput the jTextAreaMessageInput to set
-     */
-    public void setjTextAreaMessageInput(javax.swing.JTextArea jTextAreaMessageInput) {
-        this.jTextAreaMessageInput = jTextAreaMessageInput;
-    }
-
-    /**
-     * @return the jTextFieldServerIP
-     */
-    public javax.swing.JTextField getjTextFieldServerIP() {
-        return jTextFieldServerIP;
-    }
-
-    /**
-     * @param jTextFieldServerIP the jTextFieldServerIP to set
-     */
-    public void setjTextFieldServerIP(javax.swing.JTextField jTextFieldServerIP) {
-        this.jTextFieldServerIP = jTextFieldServerIP;
-    }
-
-    /**
-     * @return the jTextFieldServerPort
-     */
-    public javax.swing.JTextField getjTextFieldServerPort() {
-        return jTextFieldServerPort;
-    }
-
-    /**
-     * @param jTextFieldServerPort the jTextFieldServerPort to set
-     */
-    public void setjTextFieldServerPort(javax.swing.JTextField jTextFieldServerPort) {
-        this.jTextFieldServerPort = jTextFieldServerPort;
-    }
-
-    /**
-     * @return the jTextFieldYourName
-     */
-    public javax.swing.JTextField getjTextFieldYourName() {
-        return jTextFieldYourName;
-    }
-
-    /**
-     * @param jTextFieldYourName the jTextFieldYourName to set
-     */
-    public void setjTextFieldYourName(javax.swing.JTextField jTextFieldYourName) {
-        this.jTextFieldYourName = jTextFieldYourName;
-    }
-
-    /**
-     * @return the chatClient
-     */
-    public ChatClient getChatClient() {
-        return chatClient;
-    }
-
-    /**
-     * @param chatClient the chatClient to set
-     */
-    public void setChatClient(ChatClient chatClient) {
-        this.chatClient = chatClient;
-    }
-
-    /**
-     * @return the chatStatus
-     */
-    public ChatStatus getChatStatus() {
-        return chatStatus;
-    }
-
-    /**
-     * @param chatStatus the chatStatus to set
-     */
-    public void setChatStatus(ChatStatus chatStatus) {
-        this.chatStatus = chatStatus;
-    }
-
-    /**
-     * @return the sendButtonPressed
-     */
-    public boolean isSendButtonPressed() {
-        return sendButtonPressed;
-    }
-
-    /**
-     * @param sendButtonPressed the sendButtonPressed to set
-     */
-    public void setSendButtonPressed(boolean sendButtonPressed) {
-        this.sendButtonPressed = sendButtonPressed;
-    }
-
-    /**
-     * @return the usersAndChatHistory
-     */
-    public HashMap<String, String> getUsersAndChatHistory() {
-        return usersAndChatHistory;
-    }
-
-    /**
-     * @param usersAndChatHistory the usersAndChatHistory to set
-     */
-    public void setUsersAndChatHistory(HashMap<String, String> usersAndChatHistory) {
-        this.usersAndChatHistory = usersAndChatHistory;
-    }
-
 }

@@ -88,7 +88,7 @@ public class ClientTCPSenderTask implements Runnable {
         } catch (IOException e) {
             System.out.println("Client error: " + e.getMessage());
         } finally {
-            ChatClient.stopClient = true;
+            Client.stopClient = true;
         }
 
         try {

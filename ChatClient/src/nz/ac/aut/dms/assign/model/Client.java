@@ -5,21 +5,27 @@
  */
 package nz.ac.aut.dms.assign.model;
 
+import java.net.Socket;
+import java.util.ArrayList;
+import nz.ac.aut.dms.assign.gui.ChatGUI;
+
 /**
  *
  * @author Dong Huang
  */
-public class ChatClient {
+public class Client {
 
-    public static final String MULTICAST_ADDR = "224.0.0.4";
-    public static final int MULTICAST_PORT = 8767;
-    public static final int SERVER_PORT = 8765;
-    public static boolean stopClient = false;
+    public static ClientStatus clientStatus;
+
+    private Socket socket;
+    private Buffer buffer;
+    
+    private ArrayList<Socket> sockets;
 
 //    //private ChatClientSocket chatClientTCPSocket = null;
 //    private ChatEventListener chatEventListener;
 //
-//    public ChatClient() {
+//    public Client() {
 //    }
 //
 //    public void startClient() {
@@ -71,4 +77,16 @@ public class ChatClient {
 //            getChatEventListener().chatStateChanged();
 //        }
 //    }
+
+    public void addChatEventListener(ChatGUI aThis) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String[] getConnectedClients() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public boolean isSendPossible() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

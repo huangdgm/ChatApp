@@ -5,67 +5,78 @@
  */
 package nz.ac.aut.dms.assign.model;
 
-import java.io.Serializable;
-import java.net.InetAddress;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  *
- * @author Dong Huang
+ * @author xfn
  */
-public abstract class Message implements Serializable {
+public class Message {
 
-    private String message = null;
-    private String fromUser = null;
-    private String toUser = null;
+    private String messageContent;
+    private String originalClientName;
+    private String destinationClientName;
+    private MessageType messageType;
 
-    public Message(String message, String fromUser, String toUser) {
-        this.message = message;
-        this.fromUser = fromUser;
-        this.toUser = toUser;
-    }
-
-    public abstract String getMessageType();
-
-    public String getMessage() {
-        return message;
+    public Message(String messageContent, String originalClient, String destinationClient, MessageType messageType) {
+        this.messageContent = messageContent;
+        this.originalClientName = originalClient;
+        this.destinationClientName = destinationClient;
+        this.messageType = messageType;
     }
 
     /**
-     * @param message the message to set
+     * @return the messageContent
      */
-    public void setMessage(String message) {
-        this.message = message;
+    public String getMessageContent() {
+        return messageContent;
     }
 
     /**
-     * @return the fromUser
+     * @param messageContent the messageContent to set
      */
-    public String getFromUser() {
-        return fromUser;
+    public void setMessageContent(String messageContent) {
+        this.messageContent = messageContent;
     }
 
     /**
-     * @param fromUser the fromUser to set
+     * @return the originalClientName
      */
-    public void setFromUser(String fromUser) {
-        this.fromUser = fromUser;
+    public String getOriginalClient() {
+        return originalClientName;
     }
 
     /**
-     * @return the toUser
+     * @param originalClient the originalClientName to set
      */
-    public String getToUser() {
-        return toUser;
+    public void setOriginalClient(String originalClient) {
+        this.originalClientName = originalClient;
     }
 
     /**
-     * @param toUser the toUser to set
+     * @return the destinationClientName
      */
-    public void setToUser(String toUser) {
-        this.toUser = toUser;
+    public String getDestinationClient() {
+        return destinationClientName;
+    }
+
+    /**
+     * @param destinationClient the destinationClientName to set
+     */
+    public void setDestinationClient(String destinationClient) {
+        this.destinationClientName = destinationClient;
+    }
+
+    /**
+     * @return the messageType
+     */
+    public MessageType getMessageType() {
+        return messageType;
+    }
+
+    /**
+     * @param messageType the messageType to set
+     */
+    public void setMessageType(MessageType messageType) {
+        this.messageType = messageType;
     }
 
 }

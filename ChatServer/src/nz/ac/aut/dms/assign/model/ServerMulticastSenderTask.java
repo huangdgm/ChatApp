@@ -10,6 +10,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,12 +22,10 @@ import java.util.logging.Logger;
 public class ServerMulticastSenderTask implements Runnable {
 
     private DatagramSocket datagramSocket = null;
-    private HashMap<String, User> users = null;
-    private Buffer buffer = null;
+    private ArrayList<User> users = null;
 
-    public ServerMulticastSenderTask(HashMap<String, User> users, Buffer buffer) {
+    public ServerMulticastSenderTask(ArrayList<User> users) {
         this.users = users;
-        this.buffer = buffer;
         
         try {
             datagramSocket = new DatagramSocket();
@@ -40,8 +39,8 @@ public class ServerMulticastSenderTask implements Runnable {
         while (!ChatServer.stopServer) {
             try {
                 InetAddress multicastAddress = InetAddress.getByName(ChatServer.MULTICAST_ADDR);
-                Message message = new BroadcastMessage(users.keySet().toString(), "SERVER", "ALL");
-                System.out.println("Connected clients: " + users.keySet().toString());
+                Message message = new BroadcastMessage(users.toString(), "SERVER", "ALL");
+                System.out.println("Connected clients: " + users.toString());
                 DatagramPacket broadcastDatagramPacket = new DatagramPacket(message.getMessage().getBytes(), message.getMessage().getBytes().length, multicastAddress, ChatServer.MULTICAST_PORT);
                 
                 datagramSocket.send(broadcastDatagramPacket);

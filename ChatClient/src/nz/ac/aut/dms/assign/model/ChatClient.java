@@ -16,59 +16,59 @@ public class ChatClient {
     public static final int SERVER_PORT = 8765;
     public static boolean stopClient = false;
 
-    //private ChatClientSocket chatClientTCPSocket = null;
-    private ChatEventListener chatEventListener;
-
-    public ChatClient() {
-    }
-
-    public void startClient() {
-//        // start tcp thread for sending unicast messages to the server
-//        ClientTCPSenderTask clientTCPConnectionTask = new ClientTCPSenderTask(getChatClientTCPSocket());
-//        Thread clientTCPSenderThread = new Thread(clientTCPConnectionTask);
-//        clientTCPSenderThread.start();
+//    //private ChatClientSocket chatClientTCPSocket = null;
+//    private ChatEventListener chatEventListener;
 //
-//        // start tcp thread for receiving unicast messages from the server
-//        ClientTCPReceiverTask clientTCPReceiverTask = new ClientTCPReceiverTask(getChatClientTCPSocket());
-//        Thread clientTCPReceiverThread = new Thread(clientTCPReceiverTask);
-//        clientTCPReceiverThread.start();
+//    public ChatClient() {
+//    }
 //
-//        // start udp thread for receiving broadcast messages from the server
-//        ClientMulticastReceiverTask clientMulticastReceiverTask = new ClientMulticastReceiverTask();
-//        Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
-//        clientMulticastReceiverThread.start();
-    }
-
+//    public void startClient() {
+////        // start tcp thread for sending unicast messages to the server
+////        ClientTCPSenderTask clientTCPConnectionTask = new ClientTCPSenderTask(getChatClientTCPSocket());
+////        Thread clientTCPSenderThread = new Thread(clientTCPConnectionTask);
+////        clientTCPSenderThread.start();
+////
+////        // start tcp thread for receiving unicast messages from the server
+////        ClientTCPReceiverTask clientTCPReceiverTask = new ClientTCPReceiverTask(getChatClientTCPSocket());
+////        Thread clientTCPReceiverThread = new Thread(clientTCPReceiverTask);
+////        clientTCPReceiverThread.start();
+////
+////        // start udp thread for receiving broadcast messages from the server
+////        ClientMulticastReceiverTask clientMulticastReceiverTask = new ClientMulticastReceiverTask();
+////        Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
+////        clientMulticastReceiverThread.start();
+//    }
+//
+////    /**
+////     * @return the chatClientTCPSocket
+////     */
+////    public ChatClientSocket getChatClientTCPSocket() {
+////        return chatClientTCPSocket;
+////    }
+////
+////    /**
+////     * @param chatClientTCPSocket the chatClientTCPSocket to set
+////     */
+////    public void setChatClientTCPSocket(ChatClientSocket chatClientTCPSocket) {
+////        this.chatClientTCPSocket = chatClientTCPSocket;
+////    }
 //    /**
-//     * @return the chatClientTCPSocket
+//     * @return the chatEventListener
 //     */
-//    public ChatClientSocket getChatClientTCPSocket() {
-//        return chatClientTCPSocket;
+//    public ChatEventListener getChatEventListener() {
+//        return chatEventListener;
 //    }
 //
 //    /**
-//     * @param chatClientTCPSocket the chatClientTCPSocket to set
+//     * @param chatEventListener the chatEventListener to set
 //     */
-//    public void setChatClientTCPSocket(ChatClientSocket chatClientTCPSocket) {
-//        this.chatClientTCPSocket = chatClientTCPSocket;
+//    public void setChatEventListener(ChatEventListener chatEventListener) {
+//        this.chatEventListener = chatEventListener;
 //    }
-    /**
-     * @return the chatEventListener
-     */
-    public ChatEventListener getChatEventListener() {
-        return chatEventListener;
-    }
-
-    /**
-     * @param chatEventListener the chatEventListener to set
-     */
-    public void setChatEventListener(ChatEventListener chatEventListener) {
-        this.chatEventListener = chatEventListener;
-    }
-
-    private void notifyChatEventListener() {
-        if (chatEventListener != null) {
-            getChatEventListener().chatStateChanged();
-        }
-    }
+//
+//    private void notifyChatEventListener() {
+//        if (chatEventListener != null) {
+//            getChatEventListener().chatStateChanged();
+//        }
+//    }
 }

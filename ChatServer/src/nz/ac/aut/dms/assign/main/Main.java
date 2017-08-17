@@ -18,7 +18,7 @@ import nz.ac.aut.dms.assign.model.Buffer;
 public class Main {
 
     public static void main(String[] args) {
-        HashMap<String, User> users = new HashMap<>();
+        ArrayList<User> users = new ArrayList<>();
         Buffer buffer = new Buffer();
 
         ChatServer chatServer = new ChatServer(users, buffer);

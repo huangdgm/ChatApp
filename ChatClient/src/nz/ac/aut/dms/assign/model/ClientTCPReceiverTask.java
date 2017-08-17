@@ -7,9 +7,7 @@ package nz.ac.aut.dms.assign.model;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nz.ac.aut.dms.assign.gui.ChatGUI;
@@ -47,9 +45,17 @@ public class ClientTCPReceiverTask implements Runnable {
                 ChatClient.stopClient = true;
             }
 
-            // Update the chat history
             if (message != null) {
-                chatGUI.getUsersAndChatHistory().put(message.getFromUser(), message.getFromUser() + " : " + message.getMessage() + "\n");
+                switch (message.getMessageType()) {
+                    case "PRIVATE":
+                        break;
+                    case "BROADCAST":
+                        chatGUI.getUsersAndChatHistory().put(message.getFromUser(), message.getFromUser() + " : " + message.getMessage() + "\n");
+                        break;
+                    case "DISCONNECT":
+                        // todo: reset GUI
+                        break;
+                }
             }
         } while (!ChatClient.stopClient);
 

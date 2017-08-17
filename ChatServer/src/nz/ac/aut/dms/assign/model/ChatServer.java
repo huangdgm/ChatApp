@@ -5,6 +5,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,17 +30,17 @@ public class ChatServer {
     // The datagram socket which is used to send broadcast messages
     private DatagramSocket datagramSocket = null;
 
-    private HashMap<String, User> users = null;
+    private ArrayList<User> users = null;
     private Buffer buffer = null;
 
-    public ChatServer(HashMap<String, User> users, Buffer buffer) {
+    public ChatServer(ArrayList<User> users, Buffer buffer) {
         this.users = users;
         this.buffer = buffer;
     }
 
     public void startServer() {
         // start a thread for broadcasting datagrams
-        ServerMulticastSenderTask serverMulticastSenderTask = new ServerMulticastSenderTask(users, buffer);
+        ServerMulticastSenderTask serverMulticastSenderTask = new ServerMulticastSenderTask(users);
         Thread serverMulticastSenderThread = new Thread(serverMulticastSenderTask);
 
         serverMulticastSenderThread.start();

@@ -49,8 +49,6 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         initComponents();
         initializeChatWindow();
 
-        chatClient.setChatEventListener(this);
-
         update();
     }
 
@@ -157,7 +155,7 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         jPanelFriendList.setBorder(javax.swing.BorderFactory.createTitledBorder("Friend List"));
 
         jListFriendList.setModel(new AbstractListModel() {
-            String[] strings = {""};
+            String[] strings = {"     "};
             @Override
             public int getSize() {
                 return strings.length;
@@ -183,7 +181,7 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
             jPanelFriendListLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelFriendListLayout.createSequentialGroup()
                 .addComponent(jScrollPaneFriendList, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGap(0, 0, 0))
         );
         jPanelFriendListLayout.setVerticalGroup(
             jPanelFriendListLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -284,10 +282,10 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         String serverIP = getjTextFieldServerIP().getText();
         String serverPort = getjTextFieldServerPort().getText();
 
-        String fromUser = getjTextFieldYourName().getText();
         Socket tcpSocket = null;
 
         try {
+            // made a tcp connection with the server
             tcpSocket = new Socket(InetAddress.getByName(serverIP), Integer.valueOf(serverPort));
         } catch (UnknownHostException ex) {
             Logger.getLogger(ChatGUI.class.getName()).log(Level.SEVERE, null, ex);

@@ -8,6 +8,7 @@ package nz.ac.aut.dms.assign.model;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,21 +22,18 @@ class ServerTCPReceiverTask implements Runnable {
     final String DONE = "done";
     ObjectInputStream ois = null;
     Socket clientSocket = null;
-    User user = null;
     String threadName = null;
-    HashMap<String, User> users = null;
+    ArrayList<User> users = null;
     Buffer buffer = null;
 
     /**
      *
      * @param clientSocket
      */
-    public ServerTCPReceiverTask(Socket clientSocket, HashMap<String, User> users, Buffer buffer) {
+    public ServerTCPReceiverTask(Socket clientSocket, ArrayList<User> users, Buffer buffer) {
         this.clientSocket = clientSocket;
         this.users = users;
         this.buffer = buffer;
-
-        user = new User();
 
         try {
             ois = new ObjectInputStream(clientSocket.getInputStream());
@@ -64,21 +62,18 @@ class ServerTCPReceiverTask implements Runnable {
                         users.remove(message.getFromUser());
                         break;
                     case "PRIVATE":
-                        fullMessage = new FullMessage((PrivateMessage)message);
-                        fullMessage.setInetAddress(clientSocket.getInetAddress());
-                        fullMessage.setPort(clientSocket.getPort());
+                        fullMessage = new FullMessage((PrivateMessage) message, clientSocket);
                         buffer.getFullMessages().put(message.getToUser(), fullMessage);
                         break;
                     case "BROADCAST":
-                        fullMessage = new FullMessage((BroadcastMessage)message);
-                        fullMessage.setInetAddress(clientSocket.getInetAddress());
-                        fullMessage.setPort(clientSocket.getPort());
+                        fullMessage = new FullMessage((BroadcastMessage) message, clientSocket);
                         buffer.getFullMessages().put(message.getToUser(), fullMessage);
                         break;
                     case "HANDSHAKE":
-                        setUser(clientSocket, message);
-                        users.put(message.getFromUser(), user);
-                        System.out.println("Connection made with " + user.getUsername() + user.getInetAddress() + ":" + user.getPort());
+                        //setUser(clientSocket, message);
+                        User user = new User(message.getFromUser(), clientSocket);
+                        users.add(user);
+                        System.out.println("Connection made with: " + user.getUsername() + " / " + user.getClientSocket());
                         break;
                 }
             } catch (IOException | ClassNotFoundException ex) {
@@ -103,10 +98,4 @@ class ServerTCPReceiverTask implements Runnable {
         System.out.println("Closing connection with " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
     }
 
-    private void setUser(Socket clientSocket, Message message) {
-        user.setInetAddress(clientSocket.getInetAddress());
-        user.setUsername(message.getFromUser());
-        user.setOnline(true);
-        user.setPort(clientSocket.getPort());
-    }
 }

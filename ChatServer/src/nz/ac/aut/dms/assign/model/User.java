@@ -5,19 +5,20 @@
  */
 package nz.ac.aut.dms.assign.model;
 
-import java.net.InetAddress;
+import java.net.Socket;
 
 /**
  *
- * @author Administrator
+ * @author Dong Huang
  */
 public class User {
-    private String username = null;
-    private boolean online = false;
-    private InetAddress inetAddress = null;
-    private int port = 0;
 
-    public User() {
+    private String username = null;
+    private Socket clientSocket = null;
+
+    public User(String username, Socket clientSocket) {
+        this.username = username;
+        this.clientSocket = clientSocket;
     }
 
     /**
@@ -34,51 +35,23 @@ public class User {
         this.username = username;
     }
 
-    /**
-     * @return the online
-     */
-    public boolean isOnline() {
-        return online;
-    }
-
-    /**
-     * @param online the online to set
-     */
-    public void setOnline(boolean online) {
-        this.online = online;
-    }
-
-    /**
-     * @return the inetAddress
-     */
-    public InetAddress getInetAddress() {
-        return inetAddress;
-    }
-
-    /**
-     * @param inetAddress the inetAddress to set
-     */
-    public void setInetAddress(InetAddress inetAddress) {
-        this.inetAddress = inetAddress;
-    }
-
-    /**
-     * @return the port
-     */
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * @param port the port to set
-     */
-    public void setPort(int port) {
-        this.port = port;
-    }
-    
     @Override
     public String toString() {
         return this.username;
     }
-    
+
+    /**
+     * @return the clientSocket
+     */
+    public Socket getClientSocket() {
+        return clientSocket;
+    }
+
+    /**
+     * @param clientSocket the clientSocket to set
+     */
+    public void setClientSocket(Socket clientSocket) {
+        this.clientSocket = clientSocket;
+    }
+
 }

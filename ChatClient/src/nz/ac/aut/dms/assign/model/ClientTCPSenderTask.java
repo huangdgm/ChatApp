@@ -7,9 +7,7 @@ package nz.ac.aut.dms.assign.model;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nz.ac.aut.dms.assign.gui.ChatGUI;
@@ -22,6 +20,7 @@ public class ClientTCPSenderTask implements Runnable {
 
     private Socket tcpSocket = null;
     private ChatGUI chatGUI = null;
+    
     private ObjectOutputStream oos = null;
 
     public ClientTCPSenderTask(Socket tcpSocket, ChatGUI chatGUI) {
@@ -37,6 +36,7 @@ public class ClientTCPSenderTask implements Runnable {
 
     @Override
     public void run() {
+        // After the connection is made with the server(implemented in the ChatGUI), the client send a handshake message to server. 
         HandshakeMessage handshakeMessage = new HandshakeMessage("handshake message", chatGUI.getjTextFieldYourName().getText(), "SERVER");
 
         try {
@@ -47,18 +47,18 @@ public class ClientTCPSenderTask implements Runnable {
 
         try {
             do {
-                String input = chatGUI.getjTextAreaMessageInput().getText();
-                String toUser = chatGUI.getjListFriendList().getSelectedValue();
-                String fromUser = chatGUI.getjTextFieldYourName().getText();
-
-                if (input != null && !(chatGUI.getjListFriendList().isSelectionEmpty())) {
+                // enable or disable the send button
+                if (chatGUI.getjTextAreaMessageInput().getText() != null && !(chatGUI.getjListFriendList().isSelectionEmpty())) {
                     chatGUI.getjButtonSend().setEnabled(true);
                 } else {
                     chatGUI.getjButtonSend().setEnabled(false);
                 }
 
                 if (chatGUI.isSendButtonPressed()) {
-                    
+                    String input = chatGUI.getjTextAreaMessageInput().getText();
+                    String toUser = chatGUI.getjListFriendList().getSelectedValue();
+                    String fromUser = chatGUI.getjTextFieldYourName().getText();
+
                     if (chatGUI.getjCheckBoxBroadcast().isSelected()) {
                         toUser = "ALL";
                         BroadcastMessage bm = new BroadcastMessage(input, fromUser, toUser);

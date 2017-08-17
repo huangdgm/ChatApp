@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package nz.ac.aut.dms.assign.model;
 
 import java.io.IOException;
@@ -36,16 +31,26 @@ public class ServerTCPSenderTask implements Runnable {
     public void run() {
 
         while (true) {
-            if (buffer.isBufferEmpty() == false) {
+            if (!buffer.isBufferEmpty()) {
                 for (FullMessage fullMessage : buffer.getFullMessages().values()) {
-                    if (fullMessage.getInetAddress() == clientSocket.getInetAddress() && fullMessage.getPort() == clientSocket.getPort()) {
+                    if (fullMessage.getMessage().getMessageType().equals("BROADCAST")) {
                         try {
                             oos.writeObject(fullMessage.getMessage());
                         } catch (IOException ex) {
                             Logger.getLogger(ServerTCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
                         }
 
-                        buffer.getFullMessages().remove(fullMessage.getMessage().getToUser());
+                        //buffer.getFullMessages().remove(fullMessage.getMessage().getToUser());
+                    } else if (fullMessage.getMessage().getMessageType().equals("PRIVATE")) {
+                        if (fullMessage.getClientSocket() == clientSocket) {
+                            try {
+                                oos.writeObject(fullMessage.getMessage());
+                            } catch (IOException ex) {
+                                Logger.getLogger(ServerTCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+
+                            //buffer.getFullMessages().remove(fullMessage.getMessage().getToUser());
+                        }
                     }
                 }
             }

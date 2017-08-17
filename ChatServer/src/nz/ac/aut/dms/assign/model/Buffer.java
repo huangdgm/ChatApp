@@ -17,7 +17,7 @@ public class Buffer {
     private boolean bufferEmpty = true;
 
     public Buffer() {
-        fullMessages = new HashMap<String, FullMessage>();
+        fullMessages = new HashMap<>();
     }
 
     /**
@@ -47,7 +47,5 @@ public class Buffer {
     public void setBufferEmpty(boolean bufferEmpty) {
         this.bufferEmpty = bufferEmpty;
     }
-
-    
 
 }

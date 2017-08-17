@@ -6,6 +6,7 @@
 package nz.ac.aut.dms.assign.model;
 
 import java.net.InetAddress;
+import java.net.Socket;
 
 /**
  *
@@ -14,11 +15,11 @@ import java.net.InetAddress;
 public class FullMessage {
     
     private Message message = null;
-    private InetAddress inetAddress = null;
-    private int port = 0;
+    private Socket clientSocket = null;
 
-    public FullMessage(Message message) {
+    public FullMessage(Message message, Socket clientSocket) {
         this.message = message;
+        this.clientSocket = clientSocket;
     }
 
     /**
@@ -36,31 +37,17 @@ public class FullMessage {
     }
 
     /**
-     * @return the inetAddress
+     * @return the clientSocket
      */
-    public InetAddress getInetAddress() {
-        return inetAddress;
+    public Socket getClientSocket() {
+        return clientSocket;
     }
 
     /**
-     * @param inetAddress the inetAddress to set
+     * @param clientSocket the clientSocket to set
      */
-    public void setInetAddress(InetAddress inetAddress) {
-        this.inetAddress = inetAddress;
-    }
-
-    /**
-     * @return the port
-     */
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * @param port the port to set
-     */
-    public void setPort(int port) {
-        this.port = port;
+    public void setClientSocket(Socket clientSocket) {
+        this.clientSocket = clientSocket;
     }
 
 

@@ -15,11 +15,13 @@ import nz.ac.aut.dms.assign.gui.ChatGUI;
  */
 public class Client {
 
+    private ChatEventListener eventListener;
+
     public static ClientStatus clientStatus;
 
     private Socket socket;
     private Buffer buffer;
-    
+
     private ArrayList<Socket> sockets;
 
 //    //private ChatClientSocket chatClientTCPSocket = null;
@@ -77,16 +79,48 @@ public class Client {
 //            getChatEventListener().chatStateChanged();
 //        }
 //    }
+    public void addChatEventListener(ChatEventListener eventListener) {
+        this.eventListener = eventListener;
+    }
 
-    public void addChatEventListener(ChatGUI aThis) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void notifyGameEventListeners() {
+        eventListener.stateChanged();
     }
 
     public String[] getConnectedClients() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public boolean isSendPossible() {
+    public String getServerIP() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    public String getServerPort() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String getYourName() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public ClientStatus getState() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String getGreetMessage() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void resetChatWindow() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String getFarewellMessage() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String getChatHistory(String friend) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

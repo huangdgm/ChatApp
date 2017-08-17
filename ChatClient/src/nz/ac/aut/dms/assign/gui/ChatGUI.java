@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractListModel;
 import javax.swing.JOptionPane;
+import nz.ac.aut.dms.assign.model.ChatEventListener;
 import nz.ac.aut.dms.assign.model.Client;
 import nz.ac.aut.dms.assign.model.ClientStatus;
 import nz.ac.aut.dms.assign.model.TCPTask;
@@ -24,7 +25,7 @@ import nz.ac.aut.dms.assign.model.MulticastTask;
  *
  * @author Dong Huang
  */
-public class ChatGUI extends javax.swing.JFrame {
+public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
 
     /**
      * Creates new form ChatGUI
@@ -314,12 +315,18 @@ public class ChatGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonConnectActionPerformed
 
     private void jButtonSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSendActionPerformed
-        sendButtonPressed = true;
+        
+        //jTextAreaChatHistory.setText();
     }//GEN-LAST:event_jButtonSendActionPerformed
 
     private void jListFriendListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListFriendListValueChanged
-        //jTextAreaChatHistory.setText(jListFriendList.getSelectedValue());
-        // todo: change the content in the chat history according to the user selected.
+        String friend = jListFriendList.getSelectedValue();
+
+        if (friend != null) {
+            jButtonSend.setEnabled(true);
+            //listInventory.setToolTipText(game.getOccupantDescription(item));
+            jTextAreaChatHistory.setText(client.getChatHistory(friend));
+        }
     }//GEN-LAST:event_jListFriendListValueChanged
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -351,27 +358,45 @@ public class ChatGUI extends javax.swing.JFrame {
     private boolean sendButtonPressed = false;
     private Socket tcpSocket = null;
 
-    private void initializeChatWindow() {
-
-    }
-
     private void update() {
         // update connection panel
-        
+        jTextFieldServerIP.setText(client.getServerIP());
+        jTextFieldServerPort.setText(client.getServerPort());
+        jTextFieldYourName.setText(client.getYourName());
+
         // update friend list panel
         jListFriendList.setListData(client.getConnectedClients());
         jListFriendList.clearSelection();
-        
+
         // update chat history panel
-        
-        
+        // jTextAreaChatHistory.setText(client.getChatHistory());
+
         // update message input panel
         //jTextAreaMessageInput.setText("");
-        jButtonSend.setEnabled(client.isSendPossible());
-        jCheckBoxBroadcast.setSelected(false);
+        //jButtonSend.setEnabled(false);
+        //jCheckBoxBroadcast.setSelected(false);
     }
 
     private void setAsGameListener() {
         client.addChatEventListener(this);
+    }
+
+    @Override
+    public void stateChanged() {
+        update();
+
+        // check for "connection" or "disconnection"
+        if (client.getState() == ClientStatus.ONLINE) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    client.getGreetMessage(), "Online",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } else if (client.getState() == ClientStatus.OFFLINE) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    client.getFarewellMessage(), "Offline",
+                    JOptionPane.INFORMATION_MESSAGE);
+            client.resetChatWindow();
+        }
     }
 }

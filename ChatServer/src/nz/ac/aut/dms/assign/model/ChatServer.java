@@ -6,7 +6,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,26 +15,20 @@ import java.util.logging.Logger;
  */
 public class ChatServer {
 
-    // Local tcp port listening for incoming requests
     public static final int SERVER_TCP_PORT = 8765;
-    // The multicase ip address to which the server send broadcast messages
     public static String MULTICAST_ADDR = "224.0.0.4";
-    // The multicast port to which the server send broadcast messages
     public static final int MULTICAST_PORT = 8767;
-    // A boolean flag checking whether the server should continue running
     public static boolean stopServer = false;
 
-    // The server socket which is used to create connections to the clients
     private ServerSocket serverSocket = null;
-    // The datagram socket which is used to send broadcast messages
     private DatagramSocket datagramSocket = null;
 
     private ArrayList<User> users = null;
-    private Buffer buffer = null;
+    private ArrayList<Message> messages = null;
 
-    public ChatServer(ArrayList<User> users, Buffer buffer) {
+    public ChatServer(ArrayList<User> users, ArrayList<Message> messages) {
         this.users = users;
-        this.buffer = buffer;
+        this.messages = messages;
     }
 
     public void startServer() {
@@ -52,7 +45,7 @@ public class ChatServer {
         }
 
         Socket clientSocket = null;
-        
+
         while (!stopServer) {
 
             try {
@@ -60,16 +53,16 @@ public class ChatServer {
 
                 clientSocket = serverSocket.accept();
 
-                ServerTCPReceiverTask serverTCPReceiverTask = new ServerTCPReceiverTask(clientSocket, users, buffer);
-                ServerTCPSenderTask serverTCPSenderTask = new ServerTCPSenderTask(clientSocket, buffer);
+                ServerTCPSenderTask serverTCPSenderTask = new ServerTCPSenderTask(clientSocket, users, messages);
+                ServerTCPReceiverTask serverTCPReceiverTask = new ServerTCPReceiverTask(clientSocket, users, messages);
 
-                Thread serverTCPReceiverThread = new Thread(serverTCPReceiverTask);
                 Thread serverTCPSenderThread = new Thread(serverTCPSenderTask);
+                Thread serverTCPReceiverThread = new Thread(serverTCPReceiverTask);
 
-                // start a tcp thread for receiving
-                serverTCPReceiverThread.start();
                 // start a tcp thread for sending
                 serverTCPSenderThread.start();
+                // start a tcp thread for receiving
+                serverTCPReceiverThread.start();
             } catch (IOException e) {
                 System.err.println("Can not accept client connection: " + e.getMessage());
                 stopServer = true;
@@ -82,6 +75,6 @@ public class ChatServer {
             Logger.getLogger(ChatServer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        System.out.println("Server finishing");
+        System.out.println("Server stopped.");
     }
 }

@@ -5,13 +5,12 @@
  */
 package nz.ac.aut.dms.assign.model;
 
-import java.net.InetAddress;
-
 /**
  *
  * @author Administrator
  */
 public class HandshakeMessage extends Message {
+
     public HandshakeMessage(String message, String fromUser, String toUser) {
         super(message, fromUser, toUser);
     }

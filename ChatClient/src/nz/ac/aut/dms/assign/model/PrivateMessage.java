@@ -5,8 +5,6 @@
  */
 package nz.ac.aut.dms.assign.model;
 
-import java.net.InetAddress;
-
 /**
  *
  * @author Dong Huang

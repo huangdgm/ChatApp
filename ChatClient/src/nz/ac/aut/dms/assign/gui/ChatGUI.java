@@ -6,33 +6,26 @@
 package nz.ac.aut.dms.assign.gui;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractListModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.ListModel;
 import nz.ac.aut.dms.assign.model.Buffer;
 import nz.ac.aut.dms.assign.model.ChatClient;
-import nz.ac.aut.dms.assign.model.ChatEventListener;
 import nz.ac.aut.dms.assign.model.ChatStatus;
 import nz.ac.aut.dms.assign.model.ClientTCPReceiverTask;
 import nz.ac.aut.dms.assign.model.ClientTCPSenderTask;
 import nz.ac.aut.dms.assign.model.ClientMulticastReceiverTask;
-import nz.ac.aut.dms.assign.model.HandshakeMessage;
 
 /**
  *
  * @author Dong Huang
  */
-public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
+public class ChatGUI extends javax.swing.JFrame {
 
     /**
      * Creates new form ChatGUI
@@ -42,8 +35,7 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
      */
     public ChatGUI(ChatClient chatClient, Buffer buffer) {
         this.chatClient = chatClient;
-        this.buffer = buffer;
-        
+
         usersAndChatHistory = new HashMap<>();
 
         initComponents();
@@ -282,8 +274,6 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         String serverIP = getjTextFieldServerIP().getText();
         String serverPort = getjTextFieldServerPort().getText();
 
-        Socket tcpSocket = null;
-
         try {
             // made a tcp connection with the server
             tcpSocket = new Socket(InetAddress.getByName(serverIP), Integer.valueOf(serverPort));
@@ -300,6 +290,8 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
                     "Connection failed. Please try again.", "Warning",
                     JOptionPane.INFORMATION_MESSAGE);
         }
+        
+        System.out.println("connection made with the server.");
 
         getjTextFieldServerIP().setEnabled(false);
         getjTextFieldServerPort().setEnabled(false);
@@ -310,6 +302,11 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         getjTextAreaMessageInput().setEnabled(true);
         getjCheckBoxBroadcast().setEnabled(true);
 
+        // start udp thread for receiving broadcast messages from the server
+        ClientMulticastReceiverTask clientMulticastReceiverTask = new ClientMulticastReceiverTask(this);
+        Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
+        clientMulticastReceiverThread.start();
+
         // start tcp thread for sending unicast messages to the server
         ClientTCPSenderTask clientTCPSenderTask = new ClientTCPSenderTask(tcpSocket, this);
         Thread clientTCPSenderThread = new Thread(clientTCPSenderTask);
@@ -319,11 +316,6 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         ClientTCPReceiverTask clientTCPReceiverTask = new ClientTCPReceiverTask(tcpSocket, this);
         Thread clientTCPReceiverThread = new Thread(clientTCPReceiverTask);
         clientTCPReceiverThread.start();
-
-        // start udp thread for receiving broadcast messages from the server
-        ClientMulticastReceiverTask clientMulticastReceiverTask = new ClientMulticastReceiverTask(this);
-        Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
-        clientMulticastReceiverThread.start();
     }//GEN-LAST:event_jButtonConnectActionPerformed
 
     private void jButtonSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSendActionPerformed
@@ -361,12 +353,8 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
     private ChatClient chatClient = null;
     private ChatStatus chatStatus = null;
     private HashMap<String, String> usersAndChatHistory = null;
-    private Buffer buffer = null;
     private boolean sendButtonPressed = false;
-
-    @Override
-    public void chatStateChanged() {
-    }
+    private Socket tcpSocket = null;
 
     private void initializeChatWindow() {
 
@@ -681,22 +669,6 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
      */
     public void setChatStatus(ChatStatus chatStatus) {
         this.chatStatus = chatStatus;
-    }
-
-  
-
-    /**
-     * @return the buffer
-     */
-    public Buffer getBuffer() {
-        return buffer;
-    }
-
-    /**
-     * @param buffer the buffer to set
-     */
-    public void setBuffer(Buffer buffer) {
-        this.buffer = buffer;
     }
 
     /**

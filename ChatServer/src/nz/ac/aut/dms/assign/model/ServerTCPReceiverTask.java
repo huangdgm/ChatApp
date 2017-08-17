@@ -24,16 +24,16 @@ class ServerTCPReceiverTask implements Runnable {
     Socket clientSocket = null;
     String threadName = null;
     ArrayList<User> users = null;
-    Buffer buffer = null;
+    ArrayList<Message> messages = null;
 
     /**
      *
      * @param clientSocket
      */
-    public ServerTCPReceiverTask(Socket clientSocket, ArrayList<User> users, Buffer buffer) {
+    public ServerTCPReceiverTask(Socket clientSocket, ArrayList<User> users, ArrayList<Message> messages) {
         this.clientSocket = clientSocket;
         this.users = users;
-        this.buffer = buffer;
+        this.messages = messages;
 
         try {
             ois = new ObjectInputStream(clientSocket.getInputStream());
@@ -45,8 +45,6 @@ class ServerTCPReceiverTask implements Runnable {
     @Override
     public void run() {
         Message message = null;
-        FullMessage fullMessage = null;
-        String messageType = null;
         // After the tcp connection is made, the server read the user information from the HandshakeMessage
 
         do {
@@ -55,19 +53,15 @@ class ServerTCPReceiverTask implements Runnable {
                 System.out.println("Received in Connection Thread line: " + message.getMessage());
 
                 // Todo: write statements to process incoming messages, according to the message type
-                messageType = message.getMessageType();
-
-                switch (messageType) {
+                switch (message.getMessageType()) {
                     case "DISCONNECT":
                         users.remove(message.getFromUser());
                         break;
                     case "PRIVATE":
-                        fullMessage = new FullMessage((PrivateMessage) message, clientSocket);
-                        buffer.getFullMessages().put(message.getToUser(), fullMessage);
+                        messages.add((PrivateMessage) message);
                         break;
                     case "BROADCAST":
-                        fullMessage = new FullMessage((BroadcastMessage) message, clientSocket);
-                        buffer.getFullMessages().put(message.getToUser(), fullMessage);
+                        messages.add((BroadcastMessage) message);
                         break;
                     case "HANDSHAKE":
                         //setUser(clientSocket, message);
@@ -80,6 +74,7 @@ class ServerTCPReceiverTask implements Runnable {
                 Logger.getLogger(ServerTCPReceiverTask.class.getName()).log(Level.SEVERE, null, ex);
                 ChatServer.stopServer = true;
             }
+
         } while (!ChatServer.stopServer
                 && message.getMessage()
                 != null && !DONE.equalsIgnoreCase(message.getMessage().trim()));
@@ -99,3 +94,6 @@ class ServerTCPReceiverTask implements Runnable {
     }
 
 }
+
+
+

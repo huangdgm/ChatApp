@@ -3,6 +3,7 @@ package nz.ac.aut.dms.assign.model;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,12 +14,14 @@ import java.util.logging.Logger;
 public class ServerTCPSenderTask implements Runnable {
 
     ObjectOutputStream oos = null;
+    ArrayList<Message> messages = null;
+    ArrayList<User> users = null;
     Socket clientSocket = null;
-    Buffer buffer = null;
 
-    public ServerTCPSenderTask(Socket clientSocket, Buffer buffer) {
+    public ServerTCPSenderTask(Socket clientSocket, ArrayList<User> users, ArrayList<Message> messages) {
+        this.messages = messages;
+        this.users = users;
         this.clientSocket = clientSocket;
-        this.buffer = buffer;
 
         try {
             oos = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -31,30 +34,28 @@ public class ServerTCPSenderTask implements Runnable {
     public void run() {
 
         while (true) {
-            if (!buffer.isBufferEmpty()) {
-                for (FullMessage fullMessage : buffer.getFullMessages().values()) {
-                    if (fullMessage.getMessage().getMessageType().equals("BROADCAST")) {
+            if (!messages.isEmpty()) {
+                for (Message message : messages) {
+                    // String toUser = message.getToUser();
+                    
+                    if (message.getMessageType().equals("BROADCAST")) {
                         try {
-                            oos.writeObject(fullMessage.getMessage());
+                            oos.writeObject(message.getMessage());
+                        } catch (IOException ex) {
+                            Logger.getLogger(ServerTCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        //buffer.getFullMessages().remove(fullMessage.getMessage().getToUser());
+                    } else if (message.getMessageType().equals("PRIVATE")) {
+                        try {
+                            oos.writeObject(message.getMessage());
                         } catch (IOException ex) {
                             Logger.getLogger(ServerTCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
                         }
 
                         //buffer.getFullMessages().remove(fullMessage.getMessage().getToUser());
-                    } else if (fullMessage.getMessage().getMessageType().equals("PRIVATE")) {
-                        if (fullMessage.getClientSocket() == clientSocket) {
-                            try {
-                                oos.writeObject(fullMessage.getMessage());
-                            } catch (IOException ex) {
-                                Logger.getLogger(ServerTCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-
-                            //buffer.getFullMessages().remove(fullMessage.getMessage().getToUser());
-                        }
                     }
                 }
             }
         }
     }
-
 }

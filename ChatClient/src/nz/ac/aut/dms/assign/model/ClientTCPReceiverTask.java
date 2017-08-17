@@ -25,7 +25,7 @@ public class ClientTCPReceiverTask implements Runnable {
     public ClientTCPReceiverTask(Socket tcpSocket, ChatGUI chatGUI) {
         this.tcpSocket = tcpSocket;
         this.chatGUI = chatGUI;
-
+        
         try {
             ois = new ObjectInputStream(tcpSocket.getInputStream());
         } catch (IOException e) {
@@ -36,6 +36,7 @@ public class ClientTCPReceiverTask implements Runnable {
     @Override
     public void run() {
         Message message = null;
+        
 
         do {
             try {
@@ -48,7 +49,6 @@ public class ClientTCPReceiverTask implements Runnable {
             if (message != null) {
                 switch (message.getMessageType()) {
                     case "PRIVATE":
-                        break;
                     case "BROADCAST":
                         chatGUI.getUsersAndChatHistory().put(message.getFromUser(), message.getFromUser() + " : " + message.getMessage() + "\n");
                         break;

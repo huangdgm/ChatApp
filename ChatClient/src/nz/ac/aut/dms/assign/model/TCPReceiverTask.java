@@ -16,14 +16,13 @@ import nz.ac.aut.dms.assign.gui.ChatGUI;
  *
  * @author Dong Huang
  */
-public class TCPTask implements Runnable {
+public class TCPReceiverTask implements Runnable {
 
-    Socket tcpSocket = null;
+    Socket clientSocket = null;
     ObjectInputStream ois = null;
-    ChatGUI chatGUI = null;
 
-    public TCPTask(Socket tcpSocket, ChatGUI chatGUI) {
-        this.tcpSocket = tcpSocket;
+    public TCPReceiverTask(Socket tcpSocket, ChatGUI chatGUI) {
+        this.clientSocket = tcpSocket;
         this.chatGUI = chatGUI;
         
         try {
@@ -42,7 +41,7 @@ public class TCPTask implements Runnable {
             try {
                 message = (Message) (ois.readObject());
             } catch (IOException | ClassNotFoundException ex) {
-                Logger.getLogger(TCPTask.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(TCPReceiverTask.class.getName()).log(Level.SEVERE, null, ex);
                 Client.stopClient = true;
             }
 
@@ -63,14 +62,14 @@ public class TCPTask implements Runnable {
             if (ois != null) {
                 ois.close();
             }
-            if (tcpSocket != null) {
-                tcpSocket.close();
+            if (clientSocket != null) {
+                clientSocket.close();
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
 
-        System.out.println("Closing connection with " + tcpSocket.getInetAddress() + ":" + tcpSocket.getPort());
+        System.out.println("Closing connection with " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
     }
 
 }

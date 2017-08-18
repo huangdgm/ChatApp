@@ -17,60 +17,31 @@ import java.util.logging.Logger;
  *
  * @author Dong Huang
  */
-class TCPTask implements Runnable {
+class TCPSenderTask implements Runnable {
 
     private Socket clientSocket;
-    private DataInputStream inputStream;
     private DataOutputStream outputStream;
-    private String destinationClientName;
+    private String remoteClientName;
     private Buffer buffer;
 
-    public TCPTask(Socket clientSocket, Buffer buffer) {
+    public TCPSenderTask(Socket clientSocket, Buffer buffer, String remoteClientName) {
         this.clientSocket = clientSocket;
         this.buffer = buffer;
+        this.remoteClientName = remoteClientName;
 
         try {
             this.outputStream = new DataOutputStream(clientSocket.getOutputStream());
-            this.inputStream = new DataInputStream(clientSocket.getInputStream());
         } catch (IOException ex) {
-            Logger.getLogger(TCPTask.class.getName()).log(Level.SEVERE, null, ex);
-            Server.serverStatus = ServerStatus.OFFLINE;
+            Logger.getLogger(TCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
+            Server.serverStatus = Status.OFFLINE;
         }
     }
 
     @Override
     public void run() {
-        while (Server.serverStatus == ServerStatus.ONLINE) {
-            // read from input stream
-            String inputMessage = null;
-
-            try {
-                inputMessage = getInputStream().readUTF();
-            } catch (IOException ex) {
-                Logger.getLogger(TCPTask.class.getName()).log(Level.SEVERE, null, ex);
-                Server.serverStatus = ServerStatus.OFFLINE;
-            }
-
-            System.out.println("Received from client: " + inputMessage);
-
-            switch (getMessageType(inputMessage)) {
-                case CONNECT:
-                    buffer.addClient(inputMessage);
-                    setDestinationClientName(inputMessage);
-                    break;
-                case DISCONNECT:
-                    buffer.removeClient(inputMessage);
-                    Server.serverStatus = ServerStatus.OFFLINE;
-                    break;
-                case PRIVATE:
-                case BROADCAST:
-                    buffer.addMessage(inputMessage);
-                    break;
-            }
-
-            // write to output stream
-            if (buffer.hasMoreMessage() && destinationClientName != null) {
-                Iterator<String> i = buffer.getMessageByDestinationClientName(destinationClientName).iterator();
+        while (Server.serverStatus == Status.ONLINE) {
+            if (buffer.hasMoreMessage() && remoteClientName != null) {
+                Iterator<String> i = buffer.getMessageByDestinationClientName(remoteClientName).iterator();
 
                 while (i.hasNext()) {
                     String outputMessage = i.next();
@@ -78,8 +49,8 @@ class TCPTask implements Runnable {
                         outputStream.writeUTF(outputMessage);
                         i.remove();
                     } catch (IOException ex) {
-                        Logger.getLogger(TCPTask.class.getName()).log(Level.SEVERE, null, ex);
-                        Server.serverStatus = ServerStatus.OFFLINE;
+                        Logger.getLogger(TCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
+                        Server.serverStatus = Status.OFFLINE;
                     }
                 }
             }
@@ -96,12 +67,6 @@ class TCPTask implements Runnable {
 // thank you all|ning|all|broadcast                 broadcast
 // server - all clients
 // disconnect|server|all|server_disconnect          to be added on the client side
-    private MessageType getMessageType(String message) {
-        String[] strArray = message.trim().split("|");
-
-        return MessageType.valueOf(strArray[3]);
-    }
-
     /**
      * @return the clientSocket
      */
@@ -114,20 +79,6 @@ class TCPTask implements Runnable {
      */
     public void setClientSocket(Socket clientSocket) {
         this.clientSocket = clientSocket;
-    }
-
-    /**
-     * @return the inputStream
-     */
-    public DataInputStream getInputStream() {
-        return inputStream;
-    }
-
-    /**
-     * @param inputStream the inputStream to set
-     */
-    public void setInputStream(DataInputStream inputStream) {
-        this.inputStream = inputStream;
     }
 
     /**
@@ -148,14 +99,14 @@ class TCPTask implements Runnable {
      * @return the destinationClientName
      */
     public String getDestinationClientName() {
-        return destinationClientName;
+        return remoteClientName;
     }
 
     /**
      * @param destinationClientName the destinationClientName to set
      */
     public void setDestinationClientName(String destinationClientName) {
-        this.destinationClientName = destinationClientName;
+        this.remoteClientName = destinationClientName;
     }
 
     /**

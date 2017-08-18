@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import nz.ac.aut.dms.assign.gui.ChatGUI;
 
 /**
  *
@@ -17,36 +16,28 @@ import nz.ac.aut.dms.assign.gui.ChatGUI;
  */
 public class MulticastTask implements Runnable {
 
-    private ChatGUI chatGUI = null;
+    private Buffer buffer;
 
-    public MulticastTask(ChatGUI chatGUI) {
-        this.chatGUI = chatGUI;
+    public MulticastTask(Buffer buffer) {
+        this.buffer = buffer;
     }
 
     @Override
     public void run() {
-        String previousUsers = null;
-
-        while (!Client.stopClient) {
+        while (Client.clientStatus == Status.ONLINE) {
             try {
-                InetAddress multicastAddress = InetAddress.getByName(Client.MULTICAST_ADDR);
+                InetAddress multicastAddress = InetAddress.getByName(ClientConfig.MULTICAST_ADDR);
                 byte[] buf = new byte[256];
-                MulticastSocket multicastSocket = new MulticastSocket(Client.MULTICAST_PORT);
+                MulticastSocket multicastSocket = new MulticastSocket(ClientConfig.MULTICAST_PORT);
                 multicastSocket.joinGroup(multicastAddress);
                 DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
-                // The receive method blocks until receiving a datagram packet
                 multicastSocket.receive(datagramPacket);
+
                 String msg = new String(buf, 0, buf.length);
-
-                // If there's update with the friendlist, then update the jList
-                if (!msg.equals(previousUsers)) {
-                    chatGUI.getjListFriendList().setListData(msg.substring(1, msg.indexOf("]")).split(", "));
-                }
-
-                previousUsers = msg;
+                buffer.setFriendList(msg);
             } catch (IOException e) {
-                System.out.println("Client could not make connection: " + e.getMessage());
-                Client.stopClient = true;
+                System.out.println("Error: could not receive broadcast datagram packets!" + e.getMessage());
+                Client.clientStatus = Status.OFFLINE;
             }
         }
     }

@@ -11,6 +11,6 @@ import sun.awt.CharsetString;
  *
  * @author Administrator
  */
-public enum ClientStatus {
+public enum Status {
     ONLINE, OFFLINE
 }

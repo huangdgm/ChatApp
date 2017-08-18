@@ -16,21 +16,21 @@ import nz.ac.aut.dms.assign.gui.ChatGUI;
  *
  * @author Dong Huang
  */
-public class ClientTCPSenderTask implements Runnable {
+public class TCPSenderTask implements Runnable {
 
     private Socket tcpSocket = null;
     private ChatGUI chatGUI = null;
     
     private ObjectOutputStream oos = null;
 
-    public ClientTCPSenderTask(Socket tcpSocket, ChatGUI chatGUI) {
+    public TCPSenderTask(Socket tcpSocket, ChatGUI chatGUI) {
         this.tcpSocket = tcpSocket;
         this.chatGUI = chatGUI;
 
         try {
             oos = new ObjectOutputStream(tcpSocket.getOutputStream());
         } catch (IOException ex) {
-            Logger.getLogger(ClientTCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

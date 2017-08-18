@@ -16,9 +16,9 @@ import javax.swing.AbstractListModel;
 import javax.swing.JOptionPane;
 import nz.ac.aut.dms.assign.model.ChatEventListener;
 import nz.ac.aut.dms.assign.model.Client;
-import nz.ac.aut.dms.assign.model.ClientStatus;
-import nz.ac.aut.dms.assign.model.TCPTask;
-import nz.ac.aut.dms.assign.model.ClientTCPSenderTask;
+import nz.ac.aut.dms.assign.model.Status;
+import nz.ac.aut.dms.assign.model.TCPReceiverTask;
+import nz.ac.aut.dms.assign.model.TCPSenderTask;
 import nz.ac.aut.dms.assign.model.MulticastTask;
 
 /**
@@ -37,7 +37,7 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         this.client = client;
         setAsGameListener();
         initComponents();
-        update();
+        updateGUI();
     }
 
     /**
@@ -75,12 +75,6 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         setResizable(false);
 
         jPanelConnection.setBorder(javax.swing.BorderFactory.createTitledBorder("Connection"));
-
-        jTextFieldServerPort.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextFieldServerPortActionPerformed(evt);
-            }
-        });
 
         jLabelServerIP.setText("Server IP:");
 
@@ -143,7 +137,7 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         jPanelFriendList.setBorder(javax.swing.BorderFactory.createTitledBorder("Friend List"));
 
         jListFriendList.setModel(new AbstractListModel() {
-            String[] strings = {"     "};
+            String[] strings = {"     ", "item1", "item2"};
             @Override
             public int getSize() {
                 return strings.length;
@@ -155,7 +149,6 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
             }
         });
         jListFriendList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jListFriendList.setEnabled(false);
         jListFriendList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 jListFriendListValueChanged(evt);
@@ -262,69 +255,78 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextFieldServerPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldServerPortActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextFieldServerPortActionPerformed
-
     private void jButtonConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonConnectActionPerformed
-        String serverIP = getjTextFieldServerIP().getText();
-        String serverPort = getjTextFieldServerPort().getText();
+        // update gui
+        jButtonConnect.setEnabled(false);
 
-        try {
-            // made a tcp connection with the server
-            tcpSocket = new Socket(InetAddress.getByName(serverIP), Integer.valueOf(serverPort));
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(ChatGUI.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Connection failed. Please try again.", "Warning",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (IOException ex) {
-            Logger.getLogger(ChatGUI.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Connection failed. Please try again.", "Warning",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
+        // update model
+        String serverIP = jTextFieldServerIP.getText();
+        String serverPort = jTextFieldServerPort.getText();
+        String clientName = jTextFieldYourName.getText();
 
-        System.out.println("connection made with the server.");
+        client.connectServer(serverIP, serverPort, clientName);
 
-        getjTextFieldServerIP().setEnabled(false);
-        getjTextFieldServerPort().setEnabled(false);
-        getjTextFieldYourName().setEnabled(false);
-        getjButtonConnect().setEnabled(false);
-        getjButtonDisconnect().setEnabled(true);
-        getjListFriendList().setEnabled(true);
-        getjTextAreaMessageInput().setEnabled(true);
-        getjCheckBoxBroadcast().setEnabled(true);
-
-        // start udp thread for receiving broadcast messages from the server
-        MulticastTask clientMulticastReceiverTask = new MulticastTask(this);
-        Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
-        clientMulticastReceiverThread.start();
-
-        // start tcp thread for sending unicast messages to the server
-        ClientTCPSenderTask clientTCPSenderTask = new ClientTCPSenderTask(tcpSocket, this);
-        Thread clientTCPSenderThread = new Thread(clientTCPSenderTask);
-        clientTCPSenderThread.start();
-
-        // start tcp thread for receiving unicast messages from the server
-        TCPTask clientTCPReceiverTask = new TCPTask(tcpSocket, this);
-        Thread clientTCPReceiverThread = new Thread(clientTCPReceiverTask);
-        clientTCPReceiverThread.start();
+//        String serverIP = getjTextFieldServerIP().getText();
+//        String serverPort = getjTextFieldServerPort().getText();
+//
+//        try {
+//            // made a tcp connection with the server
+//            tcpSocket = new Socket(InetAddress.getByName(serverIP), Integer.valueOf(serverPort));
+//        } catch (UnknownHostException ex) {
+//            Logger.getLogger(ChatGUI.class.getName()).log(Level.SEVERE, null, ex);
+//            JOptionPane.showMessageDialog(
+//                    this,
+//                    "Connection failed. Please try again.", "Warning",
+//                    JOptionPane.INFORMATION_MESSAGE);
+//        } catch (IOException ex) {
+//            Logger.getLogger(ChatGUI.class.getName()).log(Level.SEVERE, null, ex);
+//            JOptionPane.showMessageDialog(
+//                    this,
+//                    "Connection failed. Please try again.", "Warning",
+//                    JOptionPane.INFORMATION_MESSAGE);
+//        }
+//
+//        // start udp thread for receiving broadcast messages from the server
+//        MulticastTask clientMulticastReceiverTask = new MulticastTask(this);
+//        Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
+//        clientMulticastReceiverThread.start();
+//
+//        // start tcp thread for sending unicast messages to the server
+//        ClientTCPSenderTask clientTCPSenderTask = new ClientTCPSenderTask(tcpSocket, this);
+//        Thread clientTCPSenderThread = new Thread(clientTCPSenderTask);
+//        clientTCPSenderThread.start();
+//
+//        // start tcp thread for receiving unicast messages from the server
+//        TCPTask clientTCPReceiverTask = new TCPTask(tcpSocket, this);
+//        Thread clientTCPReceiverThread = new Thread(clientTCPReceiverTask);
+//        clientTCPReceiverThread.start();
     }//GEN-LAST:event_jButtonConnectActionPerformed
 
     private void jButtonSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSendActionPerformed
-        
-        //jTextAreaChatHistory.setText();
+        // update gui
+        String messageInput = jTextAreaMessageInput.getText();
+        String friendName = jTextFieldYourName.getText();
+
+        // may be need to use != "null"
+        if (!messageInput.equals("")) {
+            jTextAreaChatHistory.append(friendName + " : " + messageInput);
+        }
+
+        // ---------------------------------------
+        // update model
+        if (!jCheckBoxBroadcast.isSelected()) {
+            client.setChatHistory(friendName, messageInput);
+        } else {
+            client.setChatHistoryForAll(messageInput);
+        }
     }//GEN-LAST:event_jButtonSendActionPerformed
 
     private void jListFriendListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListFriendListValueChanged
+        // update gui
         String friend = jListFriendList.getSelectedValue();
 
         if (friend != null) {
             jButtonSend.setEnabled(true);
-            //listInventory.setToolTipText(game.getOccupantDescription(item));
             jTextAreaChatHistory.setText(client.getChatHistory(friend));
         }
     }//GEN-LAST:event_jListFriendListValueChanged
@@ -353,24 +355,29 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
     // End of variables declaration//GEN-END:variables
 
     private Client client = null;
-    private ClientStatus chatStatus = null;
-    private HashMap<String, String> usersAndChatHistory = null;
-    private boolean sendButtonPressed = false;
-    private Socket tcpSocket = null;
+//    private ClientStatus chatStatus = null;
+//    private HashMap<String, String> usersAndChatHistory = null;
+//    private boolean sendButtonPressed = false;
+//    private Socket tcpSocket = null;
 
-    private void update() {
+    private void updateGUI() {
         // update connection panel
-        jTextFieldServerIP.setText(client.getServerIP());
-        jTextFieldServerPort.setText(client.getServerPort());
-        jTextFieldYourName.setText(client.getYourName());
+        if (client.getClientStatus() == Status.OFFLINE) {
+            jButtonConnect.setEnabled(true);
+            jButtonDisconnect.setEnabled(false);
+        } else if (client.getClientStatus() == Status.ONLINE) {
+            jButtonConnect.setEnabled(false);
+            jButtonDisconnect.setEnabled(true);
+        }
 
         // update friend list panel
-        jListFriendList.setListData(client.getConnectedClients());
-        jListFriendList.clearSelection();
+        if(client.isFriendListUpdated()) {
+            jListFriendList.setListData(client.getConnectedClients());
+            jListFriendList.clearSelection();
+        }
 
         // update chat history panel
-        // jTextAreaChatHistory.setText(client.getChatHistory());
-
+        jTextAreaChatHistory.setText(client.getChatHistory(jListFriendList.getSelectedValue()));
         // update message input panel
         //jTextAreaMessageInput.setText("");
         //jButtonSend.setEnabled(false);
@@ -383,15 +390,15 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
 
     @Override
     public void stateChanged() {
-        update();
+        updateGUI();
 
         // check for "connection" or "disconnection"
-        if (client.getState() == ClientStatus.ONLINE) {
+        if (client.getState() == Status.ONLINE) {
             JOptionPane.showMessageDialog(
                     this,
                     client.getGreetMessage(), "Online",
                     JOptionPane.INFORMATION_MESSAGE);
-        } else if (client.getState() == ClientStatus.OFFLINE) {
+        } else if (client.getState() == Status.OFFLINE) {
             JOptionPane.showMessageDialog(
                     this,
                     client.getFarewellMessage(), "Offline",

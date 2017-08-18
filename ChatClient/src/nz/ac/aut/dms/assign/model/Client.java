@@ -17,7 +17,7 @@ public class Client {
 
     private ChatEventListener eventListener;
 
-    public static ClientStatus clientStatus;
+    public static Status clientStatus;
 
     private Socket socket;
     private Buffer buffer;
@@ -103,7 +103,7 @@ public class Client {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public ClientStatus getState() {
+    public Status getState() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -120,6 +120,26 @@ public class Client {
     }
 
     public String getChatHistory(String friend) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void connectServer(String serverIP, String serverPort, String clientName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void setChatHistory(String friendName, String messageInput) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void setChatHistoryForAll(String messageInput) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public Status getClientStatus() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public boolean isFriendListUpdated() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

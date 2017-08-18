@@ -34,13 +34,13 @@ public class MulticastTask implements Runnable {
             System.out.println("Info: DatagramSocket created.");
         } catch (SocketException ex) {
             Logger.getLogger(MulticastTask.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("Error: DatagramSocket not successfully created");
+            System.out.println("Error: DatagramSocket not successfully created" + ex.getMessage());
         }
     }
 
     @Override
     public void run() {
-        while (Server.serverStatus == ServerStatus.ONLINE) {
+        while (Server.serverStatus == Status.ONLINE) {
             try {
                 InetAddress multicastAddress = InetAddress.getByName(ServerConfig.MULTICAST_ADDR);
                 Message message = new Message(buffer.getConnectedClientNames(), "SERVER", "ALL", MessageType.BROADCAST);
@@ -48,10 +48,10 @@ public class MulticastTask implements Runnable {
                 datagramSocket.send(broadcastDatagramPacket);
                 Thread.sleep(2000); // broadcast every 2 seconds
             } catch (IOException e) {
-                Server.serverStatus = ServerStatus.OFFLINE;
+                Server.serverStatus = Status.OFFLINE;
             } catch (InterruptedException ex) {
                 Logger.getLogger(MulticastTask.class.getName()).log(Level.SEVERE, null, ex);
-                Server.serverStatus = ServerStatus.OFFLINE;
+                Server.serverStatus = Status.OFFLINE;
             }
 
             System.out.println("Info: Connected clients: " + buffer.getConnectedClientNames());

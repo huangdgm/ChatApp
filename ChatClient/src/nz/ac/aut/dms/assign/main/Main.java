@@ -5,10 +5,7 @@
  */
 package nz.ac.aut.dms.assign.main;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import nz.ac.aut.dms.assign.gui.ChatGUI;
-import nz.ac.aut.dms.assign.model.Buffer;
 import nz.ac.aut.dms.assign.model.Client;
 
 /**
@@ -19,7 +16,6 @@ public class Main {
 
     public static void main(String[] args) {
         Client client = new Client();
-
         ChatGUI gui = new ChatGUI(client);
 
         // make the GUI visible

@@ -13,15 +13,15 @@ import java.util.logging.Logger;
  */
 public class Server {
 
-    public static ServerStatus serverStatus;
+    public static Status serverStatus;
 
     private ServerSocket serverSocket;
     private Buffer buffer;
-    
+
     private ArrayList<Socket> clientSockets;
 
     public Server() {
-        serverStatus = ServerStatus.OFFLINE;
+        serverStatus = Status.OFFLINE;
         buffer = new Buffer();
         clientSockets = new ArrayList<>();
     }
@@ -32,7 +32,7 @@ public class Server {
      * requests.
      */
     public void start() {
-        serverStatus = ServerStatus.ONLINE;
+        serverStatus = Status.ONLINE;
 
         // Start a separate thread for broadcasting datagram packets
         Thread multicastThread = new Thread(new MulticastTask(buffer));
@@ -49,19 +49,25 @@ public class Server {
         }
 
         // Start listening for the incoming connection requests
-        while (serverStatus == ServerStatus.ONLINE) {
+        while (serverStatus == Status.ONLINE) {
             try {
                 Socket clientSocket = serverSocket.accept();
                 clientSockets.add(clientSocket);
+                
+                String remoteClientName = new String();
 
-                Thread tcpThread = new Thread(new TCPTask(clientSocket, buffer));
-                tcpThread.start();
+                // Create threads for each connection
+                Thread tcpSenderThread = new Thread(new TCPSenderTask(clientSocket, buffer, remoteClientName));
+                Thread tcpReceiverThread = new Thread(new TCPReceiverTask(clientSocket, buffer, remoteClientName));
+
+                tcpSenderThread.start();
+                tcpReceiverThread.start();
             } catch (IOException e) {
                 System.out.println("Can not accept client connection: " + e.getMessage());
-                serverStatus = ServerStatus.OFFLINE;
+                serverStatus = Status.OFFLINE;
             }
         }
-        
+
         // Close the ServerSocket and all the Socket
         try {
             serverSocket.close();
@@ -75,7 +81,7 @@ public class Server {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Error: ServerSocket not successfully closed.");
         } finally {
-            serverStatus = ServerStatus.OFFLINE;
+            serverStatus = Status.OFFLINE;
         }
     }
 }

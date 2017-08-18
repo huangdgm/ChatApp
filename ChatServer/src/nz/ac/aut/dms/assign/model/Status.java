@@ -9,6 +9,6 @@ package nz.ac.aut.dms.assign.model;
  *
  * @author xfn
  */
-public enum ServerStatus {
+public enum Status {
     ONLINE, OFFLINE
 }

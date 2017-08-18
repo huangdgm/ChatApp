@@ -5,21 +5,11 @@
  */
 package nz.ac.aut.dms.assign.gui;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractListModel;
 import javax.swing.JOptionPane;
 import nz.ac.aut.dms.assign.model.ChatEventListener;
 import nz.ac.aut.dms.assign.model.Client;
 import nz.ac.aut.dms.assign.model.Status;
-import nz.ac.aut.dms.assign.model.TCPReceiverTask;
-import nz.ac.aut.dms.assign.model.TCPSenderTask;
-import nz.ac.aut.dms.assign.model.MulticastTask;
 
 /**
  *
@@ -37,7 +27,7 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         this.client = client;
         setAsGameListener();
         initComponents();
-        updateGUI();
+        resetChatWindow();
     }
 
     /**
@@ -91,7 +81,11 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
 
         jButtonDisconnect.setText("Disconnect");
         jButtonDisconnect.setActionCommand("");
-        jButtonDisconnect.setEnabled(false);
+        jButtonDisconnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDisconnectActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanelConnectionLayout = new javax.swing.GroupLayout(jPanelConnection);
         jPanelConnection.setLayout(jPanelConnectionLayout);
@@ -191,7 +185,6 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         jPanelMessageInput.setBorder(javax.swing.BorderFactory.createTitledBorder("Message Input"));
 
         jButtonSend.setText("Send");
-        jButtonSend.setEnabled(false);
         jButtonSend.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSendActionPerformed(evt);
@@ -199,7 +192,6 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         });
 
         jCheckBoxBroadcast.setText("Broadcast");
-        jCheckBoxBroadcast.setEnabled(false);
 
         jTextAreaMessageInput.setColumns(20);
         jTextAreaMessageInput.setLineWrap(true);
@@ -256,50 +248,13 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonConnectActionPerformed
-        // update gui
-        jButtonConnect.setEnabled(false);
-
         // update model
         String serverIP = jTextFieldServerIP.getText();
         String serverPort = jTextFieldServerPort.getText();
         String clientName = jTextFieldYourName.getText();
 
+        client.setClientName(clientName);
         client.connectServer(serverIP, serverPort, clientName);
-
-//        String serverIP = getjTextFieldServerIP().getText();
-//        String serverPort = getjTextFieldServerPort().getText();
-//
-//        try {
-//            // made a tcp connection with the server
-//            tcpSocket = new Socket(InetAddress.getByName(serverIP), Integer.valueOf(serverPort));
-//        } catch (UnknownHostException ex) {
-//            Logger.getLogger(ChatGUI.class.getName()).log(Level.SEVERE, null, ex);
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Connection failed. Please try again.", "Warning",
-//                    JOptionPane.INFORMATION_MESSAGE);
-//        } catch (IOException ex) {
-//            Logger.getLogger(ChatGUI.class.getName()).log(Level.SEVERE, null, ex);
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Connection failed. Please try again.", "Warning",
-//                    JOptionPane.INFORMATION_MESSAGE);
-//        }
-//
-//        // start udp thread for receiving broadcast messages from the server
-//        MulticastTask clientMulticastReceiverTask = new MulticastTask(this);
-//        Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
-//        clientMulticastReceiverThread.start();
-//
-//        // start tcp thread for sending unicast messages to the server
-//        ClientTCPSenderTask clientTCPSenderTask = new ClientTCPSenderTask(tcpSocket, this);
-//        Thread clientTCPSenderThread = new Thread(clientTCPSenderTask);
-//        clientTCPSenderThread.start();
-//
-//        // start tcp thread for receiving unicast messages from the server
-//        TCPTask clientTCPReceiverTask = new TCPTask(tcpSocket, this);
-//        Thread clientTCPReceiverThread = new Thread(clientTCPReceiverTask);
-//        clientTCPReceiverThread.start();
     }//GEN-LAST:event_jButtonConnectActionPerformed
 
     private void jButtonSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSendActionPerformed
@@ -310,14 +265,17 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         // may be need to use != "null"
         if (!messageInput.equals("")) {
             jTextAreaChatHistory.append(friendName + " : " + messageInput);
+            jButtonSend.setEnabled(false);
         }
 
         // ---------------------------------------
         // update model
-        if (!jCheckBoxBroadcast.isSelected()) {
-            client.setChatHistory(friendName, messageInput);
-        } else {
-            client.setChatHistoryForAll(messageInput);
+        if (!messageInput.equals("")) {
+            if (!jCheckBoxBroadcast.isSelected()) {
+                client.setChatHistory(friendName, messageInput);
+            } else {
+                client.setChatHistoryForAll(messageInput);
+            }
         }
     }//GEN-LAST:event_jButtonSendActionPerformed
 
@@ -330,6 +288,14 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
             jTextAreaChatHistory.setText(client.getChatHistory(friend));
         }
     }//GEN-LAST:event_jListFriendListValueChanged
+
+    private void jButtonDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDisconnectActionPerformed
+        // update model
+        client.disconnectServer();
+
+        // update gui
+        resetChatWindow();
+    }//GEN-LAST:event_jButtonDisconnectActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonConnect;
@@ -355,10 +321,6 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
     // End of variables declaration//GEN-END:variables
 
     private Client client = null;
-//    private ClientStatus chatStatus = null;
-//    private HashMap<String, String> usersAndChatHistory = null;
-//    private boolean sendButtonPressed = false;
-//    private Socket tcpSocket = null;
 
     private void updateGUI() {
         // update connection panel
@@ -371,13 +333,15 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         }
 
         // update friend list panel
-        if(client.isFriendListUpdated()) {
+        if (client.isFriendListNeedUpdated()) {
             jListFriendList.setListData(client.getConnectedClients());
             jListFriendList.clearSelection();
         }
 
         // update chat history panel
-        jTextAreaChatHistory.setText(client.getChatHistory(jListFriendList.getSelectedValue()));
+        if (!(jListFriendList.isSelectionEmpty())) {
+            jTextAreaChatHistory.setText(client.getChatHistory(jListFriendList.getSelectedValue()));
+        }
         // update message input panel
         //jTextAreaMessageInput.setText("");
         //jButtonSend.setEnabled(false);
@@ -393,17 +357,31 @@ public class ChatGUI extends javax.swing.JFrame implements ChatEventListener {
         updateGUI();
 
         // check for "connection" or "disconnection"
-        if (client.getState() == Status.ONLINE) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    client.getGreetMessage(), "Online",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } else if (client.getState() == Status.OFFLINE) {
+//        if (client.getClientStatus() == Status.ONLINE) {
+//            JOptionPane.showMessageDialog(
+//                    this,
+//                    client.getGreetMessage(), "Online",
+//                    JOptionPane.INFORMATION_MESSAGE);
+//        } else 
+        if (client.getClientStatus() == Status.OFFLINE) {
             JOptionPane.showMessageDialog(
                     this,
                     client.getFarewellMessage(), "Offline",
                     JOptionPane.INFORMATION_MESSAGE);
-            client.resetChatWindow();
+
+            resetChatWindow();
         }
+    }
+
+    private void resetChatWindow() {
+        jTextFieldServerIP.setText("");
+        jTextFieldServerPort.setText("");
+        jTextFieldYourName.setText("");
+        jButtonConnect.setEnabled(true);
+        jButtonDisconnect.setEnabled(false);
+        jCheckBoxBroadcast.setSelected(false);
+        jTextAreaChatHistory.setText("");
+        String[] blankStrArray = {""};
+        jListFriendList.setListData(blankStrArray);
     }
 }

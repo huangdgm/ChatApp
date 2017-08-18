@@ -8,8 +8,6 @@ package nz.ac.aut.dms.assign.model;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -29,8 +27,9 @@ public class TCPReceiverTask implements Runnable {
 
         try {
             inputStream = new DataInputStream(clientSocket.getInputStream());
+            System.out.println("Info: input stream successfully created.");
         } catch (IOException ex) {
-            Logger.getLogger(TCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Error: error creating the input stream. " + ex.getMessage());
             Server.serverStatus = Status.OFFLINE;
         }
     }
@@ -41,35 +40,61 @@ public class TCPReceiverTask implements Runnable {
             String inputMessage = null;
 
             try {
-                inputMessage = getInputStream().readUTF();
+                if (getInputStream().available() > 0) {
+                    inputMessage = getInputStream().readUTF();
+                    System.out.println("Info: successfully read messages from input stream : " + inputMessage);
+                }
             } catch (IOException ex) {
-                Logger.getLogger(TCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Error: error reading messages from the input stream. " + ex.getMessage());
                 Server.serverStatus = Status.OFFLINE;
             }
 
-            System.out.println("Received from client: " + inputMessage);
-
             switch (getMessageType(inputMessage)) {
-                case CONNECT:
+                case "connect":
                     getBuffer().addClient(inputMessage);
                     setRemoteClientName(inputMessage);
                     break;
-                case DISCONNECT:
+                case "disconnect":
                     getBuffer().removeClient(inputMessage);
                     Server.serverStatus = Status.OFFLINE;
                     break;
-                case PRIVATE:
-                case BROADCAST:
+                case "private":
+                case "broadcast":
                     getBuffer().addMessage(inputMessage);
+                    break;
+                default:
                     break;
             }
         }
+
+        try {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (clientSocket != null) {
+                clientSocket.close();
+            }
+            System.out.println("Info: successfully close input stream and all the client sockets.");
+        } catch (IOException e) {
+            System.out.println("Error: error closing the input stream or socket. " + e.getMessage());
+            Server.serverStatus = Status.OFFLINE;
+        }
+
+        System.out.println("Info: server is offline. Closing connection with " + clientSocket);
     }
 
-    private MessageType getMessageType(String message) {
-        String[] strArray = message.trim().split("|");
-
-        return MessageType.valueOf(strArray[3]);
+    /**
+     *
+     * @param message
+     * @return
+     */
+    private String getMessageType(String message) {
+        if (message != null) {
+            String[] strArray = message.trim().split("\\|");
+            return strArray[3];
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -115,6 +140,10 @@ public class TCPReceiverTask implements Runnable {
     }
 
     private void setRemoteClientName(String message) {
-        this.remoteClientName = message.trim().split("|")[2];
+        this.remoteClientName = message.trim().split("\\|")[2];
+    }
+
+    public String getRemoteClientName() {
+        return remoteClientName;
     }
 }

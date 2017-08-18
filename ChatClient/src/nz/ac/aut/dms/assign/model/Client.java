@@ -5,9 +5,12 @@
  */
 package nz.ac.aut.dms.assign.model;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
-import java.util.ArrayList;
-import nz.ac.aut.dms.assign.gui.ChatGUI;
+import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -22,63 +25,16 @@ public class Client {
     private Socket socket;
     private Buffer buffer;
 
-    private ArrayList<Socket> sockets;
+    public Client() {
+        buffer = new Buffer();
+        clientStatus = clientStatus.OFFLINE;
+        eventListener = null;
+    }
 
-//    //private ChatClientSocket chatClientTCPSocket = null;
-//    private ChatEventListener chatEventListener;
-//
-//    public Client() {
-//    }
-//
-//    public void startClient() {
-////        // start tcp thread for sending unicast messages to the server
-////        ClientTCPSenderTask clientTCPConnectionTask = new ClientTCPSenderTask(getChatClientTCPSocket());
-////        Thread clientTCPSenderThread = new Thread(clientTCPConnectionTask);
-////        clientTCPSenderThread.start();
-////
-////        // start tcp thread for receiving unicast messages from the server
-////        ClientTCPReceiverTask clientTCPReceiverTask = new ClientTCPReceiverTask(getChatClientTCPSocket());
-////        Thread clientTCPReceiverThread = new Thread(clientTCPReceiverTask);
-////        clientTCPReceiverThread.start();
-////
-////        // start udp thread for receiving broadcast messages from the server
-////        ClientMulticastReceiverTask clientMulticastReceiverTask = new ClientMulticastReceiverTask();
-////        Thread clientMulticastReceiverThread = new Thread(clientMulticastReceiverTask);
-////        clientMulticastReceiverThread.start();
-//    }
-//
-////    /**
-////     * @return the chatClientTCPSocket
-////     */
-////    public ChatClientSocket getChatClientTCPSocket() {
-////        return chatClientTCPSocket;
-////    }
-////
-////    /**
-////     * @param chatClientTCPSocket the chatClientTCPSocket to set
-////     */
-////    public void setChatClientTCPSocket(ChatClientSocket chatClientTCPSocket) {
-////        this.chatClientTCPSocket = chatClientTCPSocket;
-////    }
-//    /**
-//     * @return the chatEventListener
-//     */
-//    public ChatEventListener getChatEventListener() {
-//        return chatEventListener;
-//    }
-//
-//    /**
-//     * @param chatEventListener the chatEventListener to set
-//     */
-//    public void setChatEventListener(ChatEventListener chatEventListener) {
-//        this.chatEventListener = chatEventListener;
-//    }
-//
-//    private void notifyChatEventListener() {
-//        if (chatEventListener != null) {
-//            getChatEventListener().chatStateChanged();
-//        }
-//    }
+    public String getClientName() {
+        return buffer.getClientName();
+    }
+
     public void addChatEventListener(ChatEventListener eventListener) {
         this.eventListener = eventListener;
     }
@@ -88,59 +44,87 @@ public class Client {
     }
 
     public String[] getConnectedClients() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+        String connectedClientsString = buffer.getChatHistory().keySet().toString();
 
-    public String getServerIP() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public String getServerPort() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public String getYourName() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public Status getState() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return connectedClientsString.substring(1, connectedClientsString.length() - 1).split(", ");
     }
 
     public String getGreetMessage() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public void resetChatWindow() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return "Welcome to the chat app!";
     }
 
     public String getFarewellMessage() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return "Goodbye! See you.";
     }
 
     public String getChatHistory(String friend) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public void connectServer(String serverIP, String serverPort, String clientName) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return buffer.getChatHistory().get(friend);
     }
 
     public void setChatHistory(String friendName, String messageInput) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        buffer.getChatHistory().put(friendName, getChatHistory(friendName) + messageInput);
+
+        notifyGameEventListeners();
     }
 
     public void setChatHistoryForAll(String messageInput) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        for (String friendName : buffer.getChatHistory().keySet()) {
+            buffer.getChatHistory().put(friendName, getChatHistory(friendName) + messageInput);
+        }
+
+        notifyGameEventListeners();
     }
 
     public Status getClientStatus() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return Client.clientStatus;
     }
 
-    public boolean isFriendListUpdated() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean isFriendListNeedUpdated() {
+        return buffer.isFriendListNeedUpdated();
     }
 
+    public void setClientName(String clientName) {
+        this.buffer.setClientName(clientName);
+    }
+
+    public void connectServer(String serverIP, String serverPort, String clientName) {
+        clientStatus = Status.ONLINE;
+        
+        MulticastTask multicastTask = new MulticastTask(buffer);
+        Thread multicastThread = new Thread(multicastTask);
+        multicastThread.start();
+
+        try {
+            socket = new Socket(InetAddress.getByName(ClientConfig.SERVER_ADDR), ClientConfig.SERVER_PORT);
+            System.out.println("Info: socket successfully created.");
+        } catch (UnknownHostException ex) {
+            System.out.println("Error: error creating socket. " + ex.getMessage());
+            clientStatus = Status.OFFLINE;
+        } catch (IOException ex) {
+            System.out.println("Error: error creating socket. " + ex.getMessage());
+            clientStatus = Status.OFFLINE;
+        }
+
+        TCPSenderTask tcpSenderTask = new TCPSenderTask(socket, buffer);
+        Thread tcpSenderThread = new Thread(tcpSenderTask);
+        tcpSenderThread.start();
+
+        TCPReceiverTask tcpReceiverTask = new TCPReceiverTask(socket, buffer);
+        Thread tcpReceivThread = new Thread(tcpReceiverTask);
+        tcpReceivThread.start();
+        
+        notifyGameEventListeners();
+    }
+
+    public void disconnectServer() {
+        try {
+            socket.close();
+        } catch (IOException ex) {
+            System.out.println("Error: error closing socket. " + ex.getMessage());
+        }
+
+        clientStatus = clientStatus.OFFLINE;
+        notifyGameEventListeners();
+        System.out.println("Info: client closed with: " + socket);
+    }
 }

@@ -6,6 +6,7 @@
 package nz.ac.aut.dms.assign.model;
 
 import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  *
@@ -14,23 +15,25 @@ import java.util.ArrayList;
 class Buffer {
 
     private ArrayList<String> clients;
-    private ArrayList<String> messages;
+    private ArrayBlockingQueue<String> messages;
 
     public Buffer() {
         clients = new ArrayList<>();
-        messages = new ArrayList<>();
+        messages = new ArrayBlockingQueue<>(100, true);
     }
 
     String getConnectedClientNames() {
-        return clients.toString();
+        return getClients().toString();
+
+        //return s.substring(1, s.length() - 1);
     }
 
     void addClient(String message) {
-        clients.add(getOriginalClientName(message));
+        getClients().add(getOriginalClientName(message));
     }
 
     void removeClient(String message) {
-        clients.remove(getOriginalClientName(message));
+        getClients().remove(getOriginalClientName(message));
     }
 
     boolean hasMoreMessage() {
@@ -40,7 +43,7 @@ class Buffer {
     ArrayList<String> getMessageByDestinationClientName(String destinationClientName) {
         ArrayList<String> result = new ArrayList<>();
 
-        for (String message : messages) {
+        for (String message : getMessages()) {
             if (getDestinationClientName(message).equals(destinationClientName)) {
                 result.add(message);
             }
@@ -50,27 +53,63 @@ class Buffer {
     }
 
     void addMessage(String message) {
-        messages.add(getMessageContent(message));
+        getMessages().add(message);
     }
 
     void removeMessage(String message) {
-        messages.remove(getMessageContent(message));
+        getMessages().remove(getMessageContent(message));
     }
 
-    private String getMessageContent(String message) {
-        String[] strArray = message.trim().split("|");
+    /**
+     * @return the clients
+     */
+    public ArrayList<String> getClients() {
+        return clients;
+    }
+
+    /**
+     * @param clients the clients to set
+     */
+    public void setClients(ArrayList<String> clients) {
+        this.clients = clients;
+    }
+
+    /**
+     * @return the messages
+     */
+    public ArrayBlockingQueue<String> getMessages() {
+        return messages;
+    }
+
+    /**
+     * @param messages the messages to set
+     */
+    public void setMessages(ArrayBlockingQueue<String> messages) {
+        this.messages = messages;
+    }
+
+    String getHeadMessage() {
+        return messages.peek();
+    }
+
+    void poll() {
+        messages.poll();
+    }
+
+    public String getMessageContent(String message) {
+        String[] strArray = message.trim().split("\\|");
 
         return strArray[0];
     }
 
-    private String getOriginalClientName(String message) {
-        String[] strArray = message.trim().split("|");
+    public String getOriginalClientName(String message) {
+        String[] strArray = message.trim().split("\\|");
 
         return strArray[1];
     }
 
-    private String getDestinationClientName(String message) {
-        String[] strArray = message.trim().split("|");
+    public String getDestinationClientName(String message) {
+        String[] strArray = message.trim().split("\\|");
 
         return strArray[2];
     }

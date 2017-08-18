@@ -5,13 +5,9 @@
  */
 package nz.ac.aut.dms.assign.model;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -30,9 +26,10 @@ class TCPSenderTask implements Runnable {
         this.remoteClientName = remoteClientName;
 
         try {
-            this.outputStream = new DataOutputStream(clientSocket.getOutputStream());
+            outputStream = new DataOutputStream(clientSocket.getOutputStream());
+            System.out.println("Info: output stream successfully created.");
         } catch (IOException ex) {
-            Logger.getLogger(TCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Error: error creating output stream. " + ex.getMessage());
             Server.serverStatus = Status.OFFLINE;
         }
     }
@@ -41,32 +38,39 @@ class TCPSenderTask implements Runnable {
     public void run() {
         while (Server.serverStatus == Status.ONLINE) {
             if (buffer.hasMoreMessage() && remoteClientName != null) {
-                Iterator<String> i = buffer.getMessageByDestinationClientName(remoteClientName).iterator();
+                String message = buffer.getHeadMessage();
 
-                while (i.hasNext()) {
-                    String outputMessage = i.next();
+                if (buffer.getDestinationClientName(message).equals(remoteClientName)) {
                     try {
-                        outputStream.writeUTF(outputMessage);
-                        i.remove();
+                        outputStream.writeUTF(message);
+                        System.out.println("Info: successfully write message to output stream.");
                     } catch (IOException ex) {
-                        Logger.getLogger(TCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
-                        Server.serverStatus = Status.OFFLINE;
+                        System.out.println("Error: error writing message to output stream. " + ex.getMessage());
                     }
+
+                    buffer.poll();
+                    System.out.println("Info: successfully poll off the head message from the queue.");
                 }
             }
         }
+
+        try {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+            if (clientSocket != null) {
+                clientSocket.close();
+            }
+            System.out.println("Info: successfully close output stream and all the client sockets.");
+        } catch (IOException e) {
+            System.out.println("Error: error closing the output stream or socket. " + e.getMessage());
+            Server.serverStatus = Status.OFFLINE;
+        }
+
+        System.out.println("Info: server is offline. Closing connection with " + clientSocket);
+        Server.serverStatus = Status.OFFLINE;
     }
 
-// 4 types of messages: (The message is initiated by the left participant)
-// client - client
-// how are you?|ning|dong|private                   private
-// client - server
-// connect|dong|server|connect                      connect
-// disconnect|dong|server|disconnect                disconnect
-// client - all clients         
-// thank you all|ning|all|broadcast                 broadcast
-// server - all clients
-// disconnect|server|all|server_disconnect          to be added on the client side
     /**
      * @return the clientSocket
      */

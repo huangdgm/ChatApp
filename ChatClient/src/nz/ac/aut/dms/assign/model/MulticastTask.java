@@ -24,6 +24,8 @@ public class MulticastTask implements Runnable {
 
     @Override
     public void run() {
+        String previousFriendListString = null;
+
         while (Client.clientStatus == Status.ONLINE) {
             try {
                 InetAddress multicastAddress = InetAddress.getByName(ClientConfig.MULTICAST_ADDR);
@@ -33,8 +35,16 @@ public class MulticastTask implements Runnable {
                 DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
                 multicastSocket.receive(datagramPacket);
 
-                String msg = new String(buf, 0, buf.length);
-                buffer.setFriendList(msg);
+                String currentFriendListString = new String(buf, 0, buf.length);
+                currentFriendListString = currentFriendListString.substring(1, currentFriendListString.indexOf("]"));
+                
+                if (!(currentFriendListString.equals(previousFriendListString))) {
+                    buffer.updateFriendList(currentFriendListString);
+                    buffer.setFriendListNeedUpdated(true);
+                }
+                
+                previousFriendListString = currentFriendListString;
+                System.out.println("Info: receiving broadcast datagram packets: " + currentFriendListString);
             } catch (IOException e) {
                 System.out.println("Error: could not receive broadcast datagram packets!" + e.getMessage());
                 Client.clientStatus = Status.OFFLINE;

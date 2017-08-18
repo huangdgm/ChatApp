@@ -43,19 +43,22 @@ public class MulticastTask implements Runnable {
         while (Server.serverStatus == Status.ONLINE) {
             try {
                 InetAddress multicastAddress = InetAddress.getByName(ServerConfig.MULTICAST_ADDR);
-                Message message = new Message(buffer.getConnectedClientNames(), "SERVER", "ALL", MessageType.BROADCAST);
-                DatagramPacket broadcastDatagramPacket = new DatagramPacket(message.getMessageContent().getBytes(), message.getMessageContent().getBytes().length, multicastAddress, ServerConfig.MULTICAST_PORT);
+                String broadcastMessage = buffer.getConnectedClientNames() + "|server|all|broadcast";
+                DatagramPacket broadcastDatagramPacket = new DatagramPacket(broadcastMessage.getBytes(), broadcastMessage.getBytes().length, multicastAddress, ServerConfig.MULTICAST_PORT);
                 datagramSocket.send(broadcastDatagramPacket);
                 Thread.sleep(2000); // broadcast every 2 seconds
-            } catch (IOException e) {
-                Server.serverStatus = Status.OFFLINE;
-            } catch (InterruptedException ex) {
-                Logger.getLogger(MulticastTask.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException | InterruptedException e) {
+                System.out.println("Error: error sending broadcast datagram packets. " + e.getMessage());
                 Server.serverStatus = Status.OFFLINE;
             }
 
             System.out.println("Info: Connected clients: " + buffer.getConnectedClientNames());
             System.out.println("Info: Broadcast datagram packet sent.");
+        }
+
+        if (datagramSocket != null) {
+            datagramSocket.close();
+            System.out.println("Info: datagram socket successfully closed.");
         }
     }
 }

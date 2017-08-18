@@ -5,12 +5,9 @@
  */
 package nz.ac.aut.dms.assign.model;
 
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import nz.ac.aut.dms.assign.gui.ChatGUI;
 
 /**
  *
@@ -18,58 +15,57 @@ import nz.ac.aut.dms.assign.gui.ChatGUI;
  */
 public class TCPReceiverTask implements Runnable {
 
-    Socket clientSocket = null;
-    ObjectInputStream ois = null;
+    private Socket socket = null;
+    private DataInputStream inputStream = null;
+    private Buffer buffer = null;
 
-    public TCPReceiverTask(Socket tcpSocket, ChatGUI chatGUI) {
-        this.clientSocket = tcpSocket;
-        this.chatGUI = chatGUI;
-        
+    public TCPReceiverTask(Socket socket, Buffer buffer) {
+        this.socket = socket;
+        this.buffer = buffer;
+
         try {
-            ois = new ObjectInputStream(tcpSocket.getInputStream());
+            inputStream = new DataInputStream(socket.getInputStream());
+            System.out.println("Info: input stream successfully created.");
         } catch (IOException e) {
-            System.out.println("Connection: " + e.getMessage());
+            System.out.println("Error: error creating the input stream. " + e.getMessage());
+            Client.clientStatus = Status.OFFLINE;
         }
     }
 
     @Override
     public void run() {
-        Message message = null;
-        
+        while (Client.clientStatus == Status.ONLINE) {
+            String messageInput = null;
 
-        do {
             try {
-                message = (Message) (ois.readObject());
-            } catch (IOException | ClassNotFoundException ex) {
-                Logger.getLogger(TCPReceiverTask.class.getName()).log(Level.SEVERE, null, ex);
-                Client.stopClient = true;
-            }
-
-            if (message != null) {
-                switch (message.getMessageType()) {
-                    case "PRIVATE":
-                    case "BROADCAST":
-                        chatGUI.getUsersAndChatHistory().put(message.getFromUser(), message.getFromUser() + " : " + message.getMessage() + "\n");
-                        break;
-                    case "DISCONNECT":
-                        // todo: reset GUI
-                        break;
+                if (inputStream.available() > 0) {
+                    messageInput = inputStream.readUTF();
+                    System.out.println("Info: successfully read messages from input stream : " + messageInput);
                 }
+            } catch (IOException ex) {
+                System.out.println("Error: error in read from DataInputStream. " + ex.getMessage());
+                Client.clientStatus = Status.OFFLINE;
             }
-        } while (!Client.stopClient);
 
-        try {
-            if (ois != null) {
-                ois.close();
+            if (messageInput != null) {
+                buffer.addMessage(messageInput);
+                System.out.println("Info: successfully add message to buffer.");
             }
-            if (clientSocket != null) {
-                clientSocket.close();
-            }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
         }
 
-        System.out.println("Closing connection with " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
-    }
+        try {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (socket != null) {
+                socket.close();
+            }
+            System.out.println("Info: successfully close input stream and all the sockets.");
+        } catch (IOException e) {
+            System.out.println("Error: error closing the input stream or socket. " + e.getMessage());
+            Client.clientStatus = Status.OFFLINE;
+        }
 
+        System.out.println("Info: client is offline. Closing connection with " + socket.getInetAddress() + ":" + socket.getPort());
+    }
 }

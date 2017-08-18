@@ -12,6 +12,7 @@ package nz.ac.aut.dms.assign.model;
 public class ClientConfig {
 
     public static final String MULTICAST_ADDR = "224.0.0.4";
+    public static final String SERVER_ADDR = "192.168.1.72";
     public static final int MULTICAST_PORT = 8767;
     public static final int SERVER_PORT = 8765;
 }

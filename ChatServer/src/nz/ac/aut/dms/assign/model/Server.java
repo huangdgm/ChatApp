@@ -16,9 +16,9 @@ public class Server {
     public static Status serverStatus;
 
     private ServerSocket serverSocket;
-    private Buffer buffer;
+    private final Buffer buffer;
 
-    private ArrayList<Socket> clientSockets;
+    private final ArrayList<Socket> clientSockets;
 
     public Server() {
         serverStatus = Status.OFFLINE;
@@ -41,31 +41,34 @@ public class Server {
         // Open the ServerSocket
         try {
             serverSocket = new ServerSocket(ServerConfig.SERVER_TCP_PORT);
-            System.out.println("Info: ServerSocket started: " + serverSocket);
+            System.out.println("Info: ServerSocket started.");
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("Error: ServerSocket not started!");
+            System.out.println("Error: error starting the server socket. " + ex.getMessage());
             serverStatus = serverStatus.OFFLINE;
         }
 
         // Start listening for the incoming connection requests
         while (serverStatus == Status.ONLINE) {
+            Socket clientSocket = null;
+
             try {
-                Socket clientSocket = serverSocket.accept();
-                clientSockets.add(clientSocket);
-                
-                String remoteClientName = new String();
-
-                // Create threads for each connection
-                Thread tcpSenderThread = new Thread(new TCPSenderTask(clientSocket, buffer, remoteClientName));
-                Thread tcpReceiverThread = new Thread(new TCPReceiverTask(clientSocket, buffer, remoteClientName));
-
-                tcpSenderThread.start();
-                tcpReceiverThread.start();
+                clientSocket = serverSocket.accept();
+                System.out.println("Info: connection successfully established with: " + clientSocket);
             } catch (IOException e) {
-                System.out.println("Can not accept client connection: " + e.getMessage());
+                System.out.println("Error: can not accept client connection: " + e.getMessage());
                 serverStatus = Status.OFFLINE;
             }
+
+            clientSockets.add(clientSocket);
+
+            String remoteClientName = new String(); // shared by the sender thread and the receiver thread
+
+            // Create threads for each connection
+            Thread tcpSenderThread = new Thread(new TCPSenderTask(clientSocket, buffer, remoteClientName));
+            Thread tcpReceiverThread = new Thread(new TCPReceiverTask(clientSocket, buffer, remoteClientName));
+
+            tcpSenderThread.start();
+            tcpReceiverThread.start();
         }
 
         // Close the ServerSocket and all the Socket
@@ -76,10 +79,9 @@ public class Server {
                 clientSocket.close();
             }
 
-            System.out.println("Info: ServerSocket closed.");
+            System.out.println("Info: server socket and all client sockets closed.");
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("Error: ServerSocket not successfully closed.");
+            System.out.println("Error: ServerSocket not successfully closed. " + ex.getMessage());
         } finally {
             serverStatus = Status.OFFLINE;
         }

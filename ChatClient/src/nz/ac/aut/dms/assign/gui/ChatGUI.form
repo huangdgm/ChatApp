@@ -148,8 +148,10 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Disconnect"/>
             <Property name="actionCommand" type="java.lang.String" value=""/>
-            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonDisconnectActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
@@ -283,7 +285,6 @@
         <Component class="javax.swing.JButton" name="jButtonSend">
           <Properties>
             <Property name="text" type="java.lang.String" value="Send"/>
-            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonSendActionPerformed"/>
@@ -292,7 +293,6 @@
         <Component class="javax.swing.JCheckBox" name="jCheckBoxBroadcast">
           <Properties>
             <Property name="text" type="java.lang.String" value="Broadcast"/>
-            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Container class="javax.swing.JScrollPane" name="jScrollPaneMessageInput">

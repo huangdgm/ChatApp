@@ -5,12 +5,9 @@
  */
 package nz.ac.aut.dms.assign.model;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import nz.ac.aut.dms.assign.gui.ChatGUI;
 
 /**
  *
@@ -18,89 +15,62 @@ import nz.ac.aut.dms.assign.gui.ChatGUI;
  */
 public class TCPSenderTask implements Runnable {
 
-    private Socket tcpSocket = null;
-    private ChatGUI chatGUI = null;
-    
-    private ObjectOutputStream oos = null;
+    private Socket socket = null;
+    private DataOutputStream outputStream = null;
+    private Buffer buffer = null;
 
-    public TCPSenderTask(Socket tcpSocket, ChatGUI chatGUI) {
-        this.tcpSocket = tcpSocket;
-        this.chatGUI = chatGUI;
+    public TCPSenderTask(Socket socket, Buffer buffer) {
+        this.socket = socket;
+        this.buffer = buffer;
 
         try {
-            oos = new ObjectOutputStream(tcpSocket.getOutputStream());
+            outputStream = new DataOutputStream(socket.getOutputStream());
+            System.out.println("Info: output stream successfully created.");
         } catch (IOException ex) {
-            Logger.getLogger(TCPSenderTask.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Error: error creating the output stream " + ex.getMessage());
+            Client.clientStatus = Status.OFFLINE;
         }
     }
 
     @Override
     public void run() {
-        // After the connection is made with the server(implemented in the ChatGUI), the client send a handshake message to server. 
-        HandshakeMessage handshakeMessage = new HandshakeMessage("handshake message", chatGUI.getjTextFieldYourName().getText(), "SERVER");
+        // send connect message
+        String connectMessage = "connect|" + buffer.getClientName() + "|server|connect";
 
         try {
-            oos.writeObject(handshakeMessage);
+            outputStream.writeUTF(connectMessage);
+            System.out.println("Info: successfully write to the output stream.");
         } catch (IOException ex) {
-            Logger.getLogger(ChatGUI.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Error: error sending connect message" + ex.getMessage());
+            Client.clientStatus = Status.OFFLINE;
+        }
+
+        while (Client.clientStatus == Status.ONLINE) {
+            if (buffer.hasMoreMessage()) {
+                try {
+                    outputStream.writeUTF(buffer.poll());
+                } catch (IOException ex) {
+                    System.out.println("Error: error writing message to output stream. " + ex.getMessage());
+                    Client.clientStatus = Status.OFFLINE;
+                }
+                System.out.println("Info: successfully write message to output stream.");
+                System.out.println("Info: successfully poll off the head message from the queue.");
+            }
         }
 
         try {
-            do {
-                // enable or disable the send button
-                if (chatGUI.getjTextAreaMessageInput().getText() != null && !(chatGUI.getjListFriendList().isSelectionEmpty())) {
-                    chatGUI.getjButtonSend().setEnabled(true);
-                } else {
-                    chatGUI.getjButtonSend().setEnabled(false);
-                }
-
-                if (chatGUI.isSendButtonPressed()) {
-                    String input = chatGUI.getjTextAreaMessageInput().getText();
-                    String toUser = chatGUI.getjListFriendList().getSelectedValue();
-                    String fromUser = chatGUI.getjTextFieldYourName().getText();
-
-                    if (chatGUI.getjCheckBoxBroadcast().isSelected()) {
-                        toUser = "ALL";
-                        BroadcastMessage bm = new BroadcastMessage(input, fromUser, toUser);
-                        oos.writeObject(bm);
-
-                        // Update the GUI
-                        chatGUI.getjTextAreaChatHistory().append(bm.getFromUser() + " : " + bm.getMessage() + "\n");
-                        chatGUI.getjTextAreaMessageInput().setText("");
-                        chatGUI.getjButtonSend().setEnabled(false);
-
-                        chatGUI.getUsersAndChatHistory().put(bm.getFromUser(), bm.getFromUser() + " : " + bm.getMessage() + "\n");
-                        chatGUI.setSendButtonPressed(false);
-                    } else {
-                        PrivateMessage pm = new PrivateMessage(input, fromUser, toUser);
-                        oos.writeObject(pm);
-
-                        // Update the GUI
-                        chatGUI.getjTextAreaChatHistory().append(pm.getFromUser() + " : " + pm.getMessage() + "\n");
-                        chatGUI.getjTextAreaMessageInput().setText("");
-                        chatGUI.getjButtonSend().setEnabled(false);
-
-                        chatGUI.getUsersAndChatHistory().put(pm.getFromUser(), pm.getFromUser() + " : " + pm.getMessage() + "\n");
-                        chatGUI.setSendButtonPressed(false);
-                    }
-                }
-            } while (true);
+            if (outputStream != null) {
+                outputStream.close();
+            }
+            if (socket != null) {
+                socket.close();
+            }
+            System.out.println("Info: successfully close output stream and all the sockets.");
         } catch (IOException e) {
-            System.out.println("Client error: " + e.getMessage());
-        } finally {
-            Client.stopClient = true;
+            System.out.println("Error: error closing the output stream or socket. " + e.getMessage());
+            Client.clientStatus = Status.OFFLINE;
         }
 
-        try {
-            if (oos != null) {
-                oos.close();
-            }
-            if (tcpSocket != null) {
-                tcpSocket.close();
-            }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-
+        System.out.println("Info: client is offline. Closing connection with " + socket);
     }
 }
